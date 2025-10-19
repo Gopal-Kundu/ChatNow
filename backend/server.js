@@ -6,7 +6,7 @@ dotenv.config({ quiet: true });
 
 const app = express();
 app.use(express.json());
-app.use("/authentication", routes);
+app.use("/", routes);
 const port = process.env.PORT || 2000;
 app.listen(port, ()=>{
     connectDB();
