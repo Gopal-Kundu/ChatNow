@@ -101,3 +101,22 @@ export const login = async (req, res) => {
     });
   }
 };
+
+export const logout = async (req, res) =>{
+  try{
+    const cookie = req.cookies.token;
+    if(!cookie) return res.status(400).json({
+      message: "No cookie available",
+      success: false,
+    })
+    return res.status(200).clearCookie("token").json({
+      message:"logout Successful",
+      success: true,
+    });
+  }catch(error){
+    return res.status(400).json({
+      success:false,
+      message: "Logout failed.",
+    })
+  }
+};
