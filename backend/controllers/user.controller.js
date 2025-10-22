@@ -38,15 +38,16 @@ export const register = async (req, res) => {
 
 export const update = async (req, res) => {
   try {
-    const { email, ...update } = req.body;
-    if (!email) {
+    const id = req.id;
+    const update  = req.body;
+    if (!id) {
       return res.status(400).json({
-        message: "Email required to update",
-        success: true,
+        message: "Unauthorized user",
+        success: false,
       });
     }
 
-    const updatedUser = await User.findOneAndUpdate({ email }, update, {
+    const updatedUser = await User.findByIdAndUpdate( id , update, {
       new: true,
     });
     if (updatedUser)
