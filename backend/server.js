@@ -1,7 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import { connectDB } from "./configs/database.js";
-import routes from "./routes/user.route.js"
+import routes from "./routes/user.route.js";
 import cookieParser from "cookie-parser";
 dotenv.config({ quiet: true });
 
