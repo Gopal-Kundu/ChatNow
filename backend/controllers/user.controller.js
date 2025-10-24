@@ -94,6 +94,7 @@ export const login = async (req, res) => {
       username: user.username,
       photo: user.profilePhoto,
       about: user.about,
+      success: true,
     });
   } catch (error) {
     return res.status(400).json({
