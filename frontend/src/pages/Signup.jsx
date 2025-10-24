@@ -47,7 +47,7 @@ function Signup() {
   return (
     // Background Image
     <div className='h-screen bg-[url("./src/assets/Background_SignUp_Login_Page.jpg")] bg-cover bg-center'>
-      {/* Navbar */}
+        {/* Navbar */}
       <div className="inter py-4 flex justify-center items-center gap-4">
         <div className="bg-white p-2 px-5 cursor-pointer inline-block  rounded-3xl hover:bg-white/80 transition-colors duration-400">
           Sign Up
@@ -59,7 +59,8 @@ function Signup() {
         </Link>
       </div>
 
-      {/* Have a account div  */}
+      <div className="fade-in-bottom">
+        {/* Have a account div  */}
       <div className="mt-2 flex text-white justify-center items-center gap-1">
         <div className="montserrat">Have an account?</div>
         <span className="underline cursor-pointer hover:text-blue-950">
@@ -115,7 +116,8 @@ function Signup() {
           </button>
         </form>
       </div>
-    </div>
+      </div>
+      </div>
   );
 }
 

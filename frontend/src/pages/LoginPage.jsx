@@ -63,6 +63,7 @@ function LoginPage() {
         </div>
       </div>
 
+    <div className="fade-in-bottom">
       {/* Have a account div  */}
       <div className="mt-2 flex text-white justify-center items-center gap-1">
         <div className="montserrat">Have no account?</div>
@@ -109,6 +110,7 @@ function LoginPage() {
             {loading ? "Logging..." : "Login"}
           </button>
         </form>
+        </div>
       </div>
     </div>
   );
