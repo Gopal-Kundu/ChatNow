@@ -3,7 +3,7 @@ import { toast } from "sonner";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { baseurl } from "../../address/address.js";
-import { setLoading } from "../../redux/authSlice";
+import { setLoading, setUser } from "../../redux/authSlice";
 import { Link, useNavigate } from "react-router-dom";
 
 function LoginPage() {
@@ -32,6 +32,8 @@ function LoginPage() {
             position: "top-center",
             duration: 2000,
           });
+          console.log(response.data);
+          dispatch(setUser(response.data));
           navigate("/");
         }
       }

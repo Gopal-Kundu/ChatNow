@@ -61,3 +61,7 @@
 .fade-in-top { animation: fadeInTop 0.8s ease-in-out forwards; }
 .fade-in-bottom { animation: fadeInBottom 0.8s ease-in-out forwards; }
 
+.webkit-scrollbar{
+  scrollbar-width: thin;
+  scrollbar-color: #ffffff transparent;
+}

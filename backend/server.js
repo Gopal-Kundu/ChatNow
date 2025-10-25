@@ -7,8 +7,9 @@ import cors from "cors";
 dotenv.config({ quiet: true });
 
 const app = express();
+const allowed = [process.env.CLIENT_URL, process.env.MOBILE_URL];
 app.use(cors({
-    origin: process.env.CLIENT_URL,
+    origin: allowed,
     credentials: true,
 }));
 app.use(express.json());
