@@ -2,8 +2,10 @@ import React from 'react'
 import { Search } from 'lucide-react';
 import { CirclePlus } from 'lucide-react';
 import Chats from './Chats';
+import { useSelector } from 'react-redux';
 function LeftSideBar() {
-
+    const chat = useSelector((state) => state.chat.chats);
+    console.log(chat);
     return (
     <div className="bg-transparent max-h-screen border border-white   flex flex-col">
         
@@ -19,12 +21,9 @@ function LeftSideBar() {
         </div>
         
         <div className='webkit-scrollbar overflow-y-auto flex-1'>   
-        <Chats/>
-        <Chats/>
-        <Chats/>
-        <Chats/>
-        <Chats/>
-        <Chats/>
+            {chat?.map((perChat,idx)=>{
+                return <Chats key={idx} id={perChat._id} name={perChat.username} />
+            })}
         </div>
 
     </div>

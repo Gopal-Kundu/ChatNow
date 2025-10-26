@@ -3,8 +3,8 @@ import { toast } from "sonner";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { baseurl } from "../../address/address.js";
-import { setLoading } from "../../redux/authSlice";
 import { Link, useNavigate } from "react-router-dom";
+import { setLoading } from "../../redux/authSlice.js";
 
 function Signup() {
   const [formData, setFormData] = useState({

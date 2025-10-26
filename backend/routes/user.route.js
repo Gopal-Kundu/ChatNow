@@ -9,7 +9,7 @@ router.post("/update", isAuthenticated, update);
 router.post("/login", login);
 router.get("/logout",logout);
 
-router.get("/", isAuthenticated, getAllChats);
+router.get("/getAllChats", isAuthenticated, getAllChats);
 router.post("/:id", isAuthenticated, sendMessage);
 router.get("/:id", isAuthenticated, getAllMessage);
 export default router;
