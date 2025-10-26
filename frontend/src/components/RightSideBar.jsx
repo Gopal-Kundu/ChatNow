@@ -8,18 +8,16 @@ function RightSidebar() {
   const { id } = useParams();
   return (
     <div
-      className="min-h-screen max-w-screen relative fade-in-bottom"
+      className="h-screen flex flex-col fade-in-bottom"
       style={{
         backgroundImage: `url(${bg})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
       }}
     >
-      <div>
         <NavBarforChatPage />
         <ChatSection theirId={id} />
         <InputBox theirId={id} />
-      </div>
     </div>
   );
 }

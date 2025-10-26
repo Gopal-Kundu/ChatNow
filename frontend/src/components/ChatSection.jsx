@@ -1,74 +1,55 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import LoadingPage from "../pages/LoadingPage";
 import Message from "../components/Message";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { setLoading } from "../../redux/authSlice";
-import axios from "axios";
-import { setMsg } from "../../redux/chatSlice";
-import {baseurl} from "../../address/address";
-
-
-
+import { baseurl } from "../../address/address";
 
 function ChatSection({ theirId }) {
   const dispatch = useDispatch();
   const loading = useSelector((state) => state.auth.loading);
-  const msgs = useSelector((state) => state.chat.msgContainer);
+  const myId = useSelector((state) => state.auth.user._id);
 
-  useEffect(()=>{
+  const [msgs, setMsgs] = useState([]);
 
-    async function fetchData(){
-      try{
+  useEffect(() => {
+    async function fetchData() {
+      try {
         dispatch(setLoading(true));
+        setMsgs([]); 
+
         const res = await axios.get(`${baseurl}/${theirId}`, {
           withCredentials: true,
         });
 
         if (res.data.success) {
-          dispatch(setMsg(res.data.messages));
-          console.log("Data at chatSection", res.data.messages);
+          setMsgs(res.data.messages); 
+          console.log("Fetched messages:", res.data.messages);
         }
-
-      }catch(error){
+      } catch (error) {
         console.log(error.response);
-      }finally{
+      } finally {
         dispatch(setLoading(false));
       }
     }
 
-
-
-
-  fetchData();
-  },[]);
-
-
-
-
-
-
-
-
-
-
-
-
+    if (theirId) fetchData();
+  }, [theirId]);
 
   return (
-    <div>
+    <div className="webkit-scrollbar flex-1 overflow-y-auto">
       {loading ? (
         <LoadingPage />
       ) : (
-        <div className="overflow-y-auto h-[85vh] pb-[15vh]">
-          {msgs.map((arr, idx) => {
-            return (
-              <Message
-                key={idx}
-                user={theirId === arr.senderId ? "false" : "true"}
-                text={arr.message}
-              />
-            );
-          })}
+        <div>
+          {msgs.map((msg, idx) => (
+            <Message
+              key={idx}
+              user={msg.senderId === myId ? "true" : "false"}
+              text={msg.message}
+            />
+          ))}
         </div>
       )}
     </div>

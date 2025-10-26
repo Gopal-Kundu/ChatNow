@@ -31,7 +31,7 @@ function InputBox({theirId}) {
 
 
   return (
-        <div className="w-full fixed bottom-0 left-0 z-50">
+        <div>
       <div className="h-[10vh] md:h-[15vh] tracking-wide bg-black flex items-center justify-center gap-3">
         <input
           type="text"
