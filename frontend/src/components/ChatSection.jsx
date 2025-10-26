@@ -59,7 +59,7 @@ function ChatSection({ theirId }) {
       {loading ? (
         <LoadingPage />
       ) : (
-        <div className="flex flex-col overflow-y-auto gap-3">
+        <div className="overflow-y-auto h-[85vh] pb-[15vh]">
           {msgs.map((arr, idx) => {
             return (
               <Message
