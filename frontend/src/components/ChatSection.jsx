@@ -1,31 +1,29 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import React, { useEffect } from "react";
 import LoadingPage from "../pages/LoadingPage";
 import Message from "../components/Message";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setLoading } from "../../redux/authSlice";
+import axios from "axios";
+import { setMsg } from "../../redux/chatSlice";
 import { baseurl } from "../../address/address";
 
 function ChatSection({ theirId }) {
   const dispatch = useDispatch();
   const loading = useSelector((state) => state.auth.loading);
-  const myId = useSelector((state) => state.auth.user._id);
-
-  const [msgs, setMsgs] = useState([]);
+  const msgs = useSelector((state) => state.chat.msgContainer);
 
   useEffect(() => {
     async function fetchData() {
+      dispatch(setMsg([]));
       try {
         dispatch(setLoading(true));
-        setMsgs([]); 
-
         const res = await axios.get(`${baseurl}/${theirId}`, {
           withCredentials: true,
         });
 
         if (res.data.success) {
-          setMsgs(res.data.messages); 
-          console.log("Fetched messages:", res.data.messages);
+          dispatch(setMsg(res.data.messages));
+          console.log("Data at chatSection", res.data.messages);
         }
       } catch (error) {
         console.log(error.response);
@@ -34,8 +32,8 @@ function ChatSection({ theirId }) {
       }
     }
 
-    if (theirId) fetchData();
-  }, [theirId]);
+    fetchData();
+  }, []);
 
   return (
     <div className="webkit-scrollbar flex-1 overflow-y-auto">
@@ -43,13 +41,15 @@ function ChatSection({ theirId }) {
         <LoadingPage />
       ) : (
         <div>
-          {msgs.map((msg, idx) => (
-            <Message
-              key={idx}
-              user={msg.senderId === myId ? "true" : "false"}
-              text={msg.message}
-            />
-          ))}
+          {msgs.map((arr, idx) => {
+            return (
+              <Message
+                key={idx}
+                user={theirId === arr.senderId ? "false" : "true"}
+                text={arr.message}
+              />
+            );
+          })}
         </div>
       )}
     </div>
