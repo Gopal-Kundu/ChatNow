@@ -23,7 +23,7 @@ function ChatSection({ theirId }) {
 
         if (res.data.success) {
           dispatch(setMsg(res.data.messages));
-          // console.log("Data at chatSection", res.data.messages);
+          console.log("Data at chatSection", res.data.messages);
         }
       } catch (error) {
         console.log(error.response);
@@ -33,7 +33,7 @@ function ChatSection({ theirId }) {
     }
 
     fetchData();
-  }, []);
+  }, [theirId]);
 
   return (
     <div className="webkit-scrollbar flex-1 overflow-y-auto">

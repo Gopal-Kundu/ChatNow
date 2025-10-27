@@ -1,12 +1,14 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import defaultImg from "../assets/defaultUser.png";
+import { useSelector } from "react-redux";
 function Chats({ id, name, logo}) {
   const navigate = useNavigate();
 
   function openChat() {
     navigate(`/${id}`);
   }
+  const online = useSelector((store)=>store.socket.onlineUsers);
   return (
     <div onClick={openChat} className="select-none">
       {/* Chats  */}
@@ -17,7 +19,7 @@ function Chats({ id, name, logo}) {
             <img src={logo ? logo : defaultImg} alt="Profile-photo" />
           </div>
           <div
-            className={`bg-green-700 h-3 w-3 absolute rounded-full top-8 left-8 z-1`}
+            className={`${online.includes(id) ? "bg-green-700":""} h-3 w-3 absolute rounded-full top-8 left-8 z-1`}
           ></div>
         </div>
         {/* name and text */}

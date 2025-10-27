@@ -34,21 +34,22 @@ let onlineUsers = {};
 io.on("connection", (socket) => {
   console.log("User is connected", socket.id);
   socket.on("Connect me", (data) => {
-    console.log("Got the data",data);
+    console.log("Got the data", data);
     if (data) {
       onlineUsers[data] = socket.id;
       console.log("Connected Users: ", Object.keys(onlineUsers));
+      io.emit("Connected users", Object.keys(onlineUsers));
     }
   });
-
-  socket.on("disconnect", ()=>{
+  
+  socket.on("disconnect", () => {
     console.log("User disconnected", socket.id);
-    for(let [k,v] of Object.entries(onlineUsers)){
-        if(onlineUsers[k] === socket.id)
-             delete onlineUsers[k];
+    for (let [k, v] of Object.entries(onlineUsers)) {
+      if (onlineUsers[k] === socket.id) delete onlineUsers[k];
     }
-    console.log("After disconnecting users online ",Object.keys(onlineUsers));
-  })
+    console.log("After disconnecting users online ", Object.keys(onlineUsers));
+    io.emit("Disconnected users", Object.keys(onlineUsers));
+  });
 });
 
 const port = process.env.PORT;

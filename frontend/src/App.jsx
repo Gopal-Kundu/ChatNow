@@ -4,17 +4,26 @@ import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import RightSidebar from "./components/RightSidebar";
 import { io } from "socket.io-client";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { baseurl } from "../address/address";
+import { setOnlineUsers } from "../redux/socketSlice";
 
+export let socket;
 const App = () => {
   const user = useSelector((store) => store.auth.user);
-
+  const dispatch = useDispatch();
   useEffect(()=>{
     if(!user) return;
-    let socket = io(`${baseurl}`);
+    socket = io(`${baseurl}`);
     socket.emit("Connect me", user._id);
-    
+    socket.on("Connected users", (data)=>{
+      dispatch(setOnlineUsers(data));
+    })
+
+    socket.on("Disconnected users", (data)=>{
+      dispatch(setOnlineUsers(data));
+    })
+
     return () => socket.disconnect();
   }, [user]);
 

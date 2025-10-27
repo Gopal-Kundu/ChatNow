@@ -7,6 +7,7 @@ import defaultImg from "../assets/defaultUser.png"
 function NavBarforChatPage() {
   const logo = null;
   const navigate = useNavigate();
+  const online = useSelector((store)=>store.socket.onlineUsers);
   const {id} = useParams();
   const chat = useSelector((state)=>state.chat.chats);
   function navigateToChatScreen() {
@@ -27,7 +28,7 @@ function NavBarforChatPage() {
             <img src={logo ? logo : defaultImg} alt="Profile-photo" />
           </div>
           <div
-            className={`bg-green-700 h-3 w-3 absolute rounded-full top-8 left-8 z-1`}
+            className={`${online?.includes(id) ? "bg-green-700" : ""} h-3 w-3 absolute rounded-full top-8 left-8 z-1`}
           ></div>
         </div>
 

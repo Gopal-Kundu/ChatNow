@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
-import { setLoading } from '../../redux/authSlice';
 import axios from 'axios';
 import {baseurl} from "../../address/address";
 import { setMsg } from '../../redux/chatSlice';
