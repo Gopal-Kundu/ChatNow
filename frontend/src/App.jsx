@@ -13,8 +13,9 @@ const App = () => {
   useEffect(()=>{
     if(!user) return;
     let socket = io(`${baseurl}`);
-
-
+    socket.emit("Connect me", user._id);
+    
+    return () => socket.disconnect();
   }, [user]);
 
   return (
