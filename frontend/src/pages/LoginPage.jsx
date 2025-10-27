@@ -32,7 +32,7 @@ function LoginPage() {
             position: "top-center",
             duration: 2000,
           });
-          console.log(response.data);
+          // console.log(response.data);
           dispatch(setUser(response.data));
           navigate("/");
         }

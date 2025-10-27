@@ -5,7 +5,7 @@ import Chats from './Chats';
 import { useSelector } from 'react-redux';
 function LeftSideBar() {
     const chat = useSelector((state) => state.chat.chats);
-    console.log(chat);
+    // console.log(chat);
     return (
     <div className="bg-transparent max-h-screen border border-white   flex flex-col">
         
