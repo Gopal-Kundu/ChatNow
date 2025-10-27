@@ -23,13 +23,13 @@ app.use("/", routes);
 
 //SOCKET.IO
 const server = http.createServer(app);
-const io = new Server(server, {
+export const io = new Server(server, {
   cors: {
     origin: allowed,
   },
 });
 
-let onlineUsers = {};
+export let onlineUsers = {};
 
 io.on("connection", (socket) => {
   console.log("User is connected", socket.id);

@@ -3,6 +3,9 @@ import { Conversation } from "../models/conversation.model.js";
 import { Message } from "../models/message.model.js";
 import { User } from "../models/user.model.js";
 import dotenv from "dotenv";
+import { io, onlineUsers } from "../server.js";
+
+
 dotenv.config({ quiet: true });
 
 export const getAllChats = async (req, res) => {
@@ -66,6 +69,9 @@ export const sendMessage = async (req, res) => {
       conversation.allMessages.push(newMessage._id);
       await conversation.save();
     }
+
+    //SOCKET.IO
+    io.to(getSocketId(receiverId)).emit("Msg from sender", newMessage);
     return res.status(200).json({
       message: "Message sent successfully",
       success: true,
@@ -78,6 +84,10 @@ export const sendMessage = async (req, res) => {
     });
   }
 };
+
+function getSocketId(recieverId){
+  return onlineUsers[recieverId];
+}
 
 export const getAllMessage = async (req, res) =>{
     try{

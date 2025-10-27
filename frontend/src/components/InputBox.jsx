@@ -1,36 +1,45 @@
-import React, { useState } from 'react'
-import { useDispatch, useSelector } from 'react-redux';
-import axios from 'axios';
-import {baseurl} from "../../address/address";
-import { setMsg } from '../../redux/chatSlice';
-import { Send } from 'lucide-react';
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import axios from "axios";
+import { baseurl } from "../../address/address";
+import { setMsg } from "../../redux/chatSlice";
+import { Send } from "lucide-react";
+import { socket } from "../App";
 
-function InputBox({theirId}) {
-  const [msg, currMsg] = useState(""); //Msg for input field
+function InputBox({ theirId }) {
+  const [msg, currMsg] = useState(""); // input text
   const dispatch = useDispatch();
-  const oldMsgs = useSelector((store)=>store.chat.msgContainer);
-  async function sendMsg(){
-    if (msg.trim() == "") return;
-    try{
-      const res = await axios.post(`${baseurl}/${theirId}`, { "message": msg },{
+
+  useEffect(() => {
+    socket.on("Msg from sender", (newMessage) => {
+      dispatch(setMsg(newMessage)); 
+    });
+  }, [dispatch]);
+
+  async function sendMsg() {
+    if (msg.trim() === "") return;
+
+    try {
+      const res = await axios.post(
+        `${baseurl}/${theirId}`,
+        { message: msg },
+        {
           headers: { "Content-Type": "application/json" },
           withCredentials: true,
         }
       );
 
-      if(res.data.success){
-        dispatch(setMsg([...oldMsgs, res.data.newMessage]));
+      if (res.data.success) {
+        dispatch(setMsg(res.data.newMessage));
         currMsg("");
       }
-
-    }catch(err){
+    } catch (err) {
       console.log(err);
     }
   }
 
-
   return (
-        <div>
+    <div>
       <div className="h-[10vh] md:h-[15vh] tracking-wide bg-black flex items-center justify-center gap-3">
         <input
           type="text"
@@ -45,7 +54,7 @@ function InputBox({theirId}) {
         />
       </div>
     </div>
-  )
+  );
 }
 
-export default InputBox
+export default InputBox;

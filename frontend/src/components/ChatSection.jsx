@@ -4,7 +4,7 @@ import Message from "../components/Message";
 import { useDispatch, useSelector } from "react-redux";
 import { setLoading } from "../../redux/authSlice";
 import axios from "axios";
-import { setMsg } from "../../redux/chatSlice";
+import { setAllMsgs } from "../../redux/chatSlice";
 import { baseurl } from "../../address/address";
 
 function ChatSection({ theirId }) {
@@ -14,7 +14,7 @@ function ChatSection({ theirId }) {
 
   useEffect(() => {
     async function fetchData() {
-      dispatch(setMsg([]));
+      dispatch(setAllMsgs([]));
       try {
         dispatch(setLoading(true));
         const res = await axios.get(`${baseurl}/${theirId}`, {
@@ -22,8 +22,8 @@ function ChatSection({ theirId }) {
         });
 
         if (res.data.success) {
-          dispatch(setMsg(res.data.messages));
-          console.log("Data at chatSection", res.data.messages);
+          dispatch(setAllMsgs(res.data.messages));
+          // console.log("Data at chatSection", res.data.messages);
         }
       } catch (error) {
         console.log(error.response);
