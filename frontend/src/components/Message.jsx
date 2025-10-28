@@ -14,7 +14,7 @@ function Message({ user, text }) {
       }`}
     >
       <div
-        className={`storyScript text-xl text-white rounded-2xl tracking-wider max-w-[60%] p-4 ${
+        className={`comic text-xl text-white rounded-2xl tracking-wider max-w-[60%] p-4 ${
           user === "true" ? "bg-green-700" : "bg-purple-500"
         }`}
       >

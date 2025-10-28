@@ -1,6 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Story+Script&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Comic+Relief:wght@400;700&display=swap');
 
 @import "tailwindcss";
 
@@ -59,7 +60,7 @@
 .fade-in-left { animation: fadeInLeft 0.8s ease-in-out forwards; }
 .fade-in-right { animation: fadeInRight 0.8s ease-in-out forwards; }
 .fade-in-top { animation: fadeInTop 0.8s ease-in-out forwards; }
-.fade-in-bottom { animation: fadeInBottom 0.8s ease-in-out forwards; }
+.fade-in-bottom { animation: fadeInBottom  ease-in-out forwards; }
 
 .webkit-scrollbar{
   scrollbar-width: thin;
@@ -68,4 +69,10 @@
 
 .storyScript {
    font-family: "Story Script", sans-serif;
+}
+
+.comic {
+  font-family: "Comic Relief", system-ui;
+  font-weight: 400;
+  font-style: normal;
 }
