@@ -5,11 +5,11 @@ import { useSelector } from "react-redux";
 import defaultImg from "../assets/defaultUser.png"
 
 function NavBarforChatPage() {
-  const logo = null;
   const navigate = useNavigate();
   const online = useSelector((store)=>store.socket.onlineUsers);
   const {id} = useParams();
   const chat = useSelector((state)=>state.chat.chats);
+  const logo = chat?.find((arr)=>arr._id===id).profilePhoto;
   function navigateToChatScreen() {
     navigate("/");
   }

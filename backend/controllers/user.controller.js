@@ -2,6 +2,8 @@ import { User } from "../models/user.model.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
+import getDataUri from "../configs/datauri.js";
+import cloudinary from "../configs/cloudinary.js";
 dotenv.config({quiet : true});
 export const register = async (req, res) => {
   try {
@@ -54,6 +56,7 @@ export const update = async (req, res) => {
       return res.status(200).json({
         success: true,
         message: "Profile updated successfully.",
+        updatedUser
       });
   } catch (error) {
     return res.status(400).json({
@@ -62,7 +65,31 @@ export const update = async (req, res) => {
     });
   }
 };
+export const uploadProfilePhoto = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
+    const file64 = getDataUri(req.file).content;
 
+    const result = await cloudinary.uploader.upload(file64, {
+      folder: "profilePhotos",
+    });
+
+    const user = await User.findById(req.id);
+    user.profilePhoto = result.secure_url;
+    await user.save();
+    return res.status(200).json({
+      message: "Profile photo uploaded successfully",
+      user
+    });
+  } catch (err) {
+    console.error("Upload error:", err.message);
+
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -71,7 +98,6 @@ export const login = async (req, res) => {
         message: "Please fill all the boxes",
         success: false,
       });
-
     const user = await User.findOne({ email });
     if (!user)
       return res.status(400).json({
@@ -88,17 +114,17 @@ export const login = async (req, res) => {
       userId: user._id,
     };
     const token = await jwt.sign(tokenData, process.env.SECRET_KEY, {expiresIn: "7d"});
-
-    return res.status(200).cookie("token",token, {maxAge: 7*24*60*60*1000, httpOnly: true, sameSite: 'strict'}).json({
-      _id: user._id,
+   
+    return res.status(200).cookie("token",token, {maxAge: 7*24*60*60*1000, httpOnly: true, sameSite: 'strict', secure: false}).json({
+       _id: user._id,
       username: user.username,
-      photo: user.profilePhoto,
+      profilePhoto: user.profilePhoto,
       about: user.about,
       success: true,
     });
   } catch (error) {
     return res.status(400).json({
-      message: "Server error",
+      message: "Server errors",
       success: false,
     });
   }
@@ -122,3 +148,5 @@ export const logout = async (req, res) =>{
     })
   }
 };
+
+

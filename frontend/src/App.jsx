@@ -7,6 +7,7 @@ import { io } from "socket.io-client";
 import { useDispatch, useSelector } from "react-redux";
 import { baseurl } from "../address/address";
 import { setOnlineUsers } from "../redux/socketSlice";
+import UpdateProfilePage from "./pages/UpdateProfilePage";
 
 export let socket;
 const App = () => {
@@ -33,6 +34,7 @@ const App = () => {
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/:id" element={<RightSidebar />} />
+        <Route path="/update" element={<UpdateProfilePage />} />
       </Routes>
     </div>
   );
