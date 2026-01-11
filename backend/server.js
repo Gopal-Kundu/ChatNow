@@ -30,7 +30,10 @@ export const io = new Server(server, {
     origin: CLIENT_URL,
     credentials: true,
   },
+  path: "/api/socket",
+  addTrailingSlash: false,
 });
+
 export let onlineUsers = {};
 
 io.on("connection", (socket) => {
@@ -54,7 +57,7 @@ io.on("connection", (socket) => {
   });
 });
 
-const port = process.env.PORT;
+const port = process.env.PORT || 2005;
 server.listen(port, () => {
   connectDB();
   console.log(`Server running on:\n http://localhost:${port}`);
