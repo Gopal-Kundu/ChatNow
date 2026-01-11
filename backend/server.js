@@ -6,12 +6,15 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import http from "http";
 import { Server } from "socket.io";
-
 dotenv.config();
+
 const app = express();
+
+const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:5173";
+
 app.use(
   cors({
-    origin: process.env.CLIENT_URL,
+    origin: CLIENT_URL,
     credentials: true,
   })
 );
@@ -24,7 +27,7 @@ app.use("/", routes);
 const server = http.createServer(app);
 export const io = new Server(server, {
   cors: {
-    origin: process.env.CLIENT_URL,
+    origin: CLIENT_URL,
     credentials: true,
   },
 });
