@@ -14,6 +14,7 @@ import {
 import { setUser } from "../../redux/authSlice";
 import { baseurl } from "../../address/address";
 import { toast } from "sonner";
+import Footer from "./Footer";
 
 function LeftSideBar() {
   const dispatch = useDispatch();
@@ -124,6 +125,7 @@ function LeftSideBar() {
           />
         ))}
       </div>
+      <Footer/>
     </div>
   );
 }
