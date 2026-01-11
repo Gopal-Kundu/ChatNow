@@ -10,7 +10,7 @@ import UpdateProfilePage from "./pages/UpdateProfilePage";
 import axios from "axios";
 import { setUser } from "../redux/authSlice";
 import { setChats } from "../redux/chatSlice";
-import RightSidebar from "./components/RightSidebar";
+import { Rightsidebar } from "./components/RightSidebar";
 
 export let socket;
 const App = () => {
@@ -63,7 +63,7 @@ const App = () => {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/chat/:id" element={<RightSidebar />} />
+        <Route path="/chat/:id" element={<Rightsidebar />} />
         <Route path="/profile" element={<UpdateProfilePage />} />
         <Route path="/profile/:id" element={<UpdateProfilePage />} />
       </Routes>

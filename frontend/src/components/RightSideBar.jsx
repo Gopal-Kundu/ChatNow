@@ -4,7 +4,7 @@ import NavBarforChatPage from "./NavBarforChatPage";
 import ChatSection from "./ChatSection";
 import InputBox from "./InputBox";
 import { useParams } from "react-router-dom";
-function RightSidebar() {
+export function Rightsidebar() {
   const { id } = useParams();
   return (
     <div
@@ -21,5 +21,3 @@ function RightSidebar() {
     </div>
   );
 }
-
-export default RightSidebar;
