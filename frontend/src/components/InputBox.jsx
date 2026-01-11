@@ -12,11 +12,18 @@ function InputBox({ theirId }) {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    if(!socket) return;
-    socket.on("Msg from sender", (newMessage) => {
-      dispatch(setMsg(newMessage));
-    });
-  }, [dispatch]);
+  if (!socket) return;
+
+  const handleIncomingMessage = (newMessage) => {
+    dispatch(setMsg(newMessage));
+  };
+
+  socket.on("Msg from sender", handleIncomingMessage);
+
+  return () => {
+    socket.off("Msg from sender", handleIncomingMessage);
+  };
+}, [socket, dispatch]);
 
   function handleKeyDown(e) {
     if (e.key === "Enter" && !e.shiftKey) {
