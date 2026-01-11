@@ -55,6 +55,9 @@ io.on("connection", (socket) => {
   });
 });
 
+app.get("/", (req, res) => {
+  res.status(200).json({ message: "Server is running!" });
+});
 const port = process.env.PORT || 2005;
 server.listen(port, () => {
   connectDB();
