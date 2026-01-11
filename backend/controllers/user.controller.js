@@ -3,7 +3,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import { uploadToCloudinary } from "../configs/fileToCloudinary.js";
-dotenv.config({quiet : true});
+dotenv.config({ quiet: true });
 
 
 export const register = async (req, res) => {
@@ -43,7 +43,7 @@ export const register = async (req, res) => {
 export const update = async (req, res) => {
   try {
     const id = req.id;
-    const update  = req.body;
+    const update = req.body;
     if (!id) {
       return res.status(400).json({
         message: "Unauthorized user",
@@ -51,7 +51,7 @@ export const update = async (req, res) => {
       });
     }
 
-    const updatedUser = await User.findByIdAndUpdate( id , update, {
+    const updatedUser = await User.findByIdAndUpdate(id, update, {
       new: true,
     });
     if (updatedUser)
@@ -113,10 +113,12 @@ export const login = async (req, res) => {
     const tokenData = {
       userId: user._id,
     };
-    const token = await jwt.sign(tokenData, process.env.SECRET_KEY, {expiresIn: "7d"});
-   
-    return res.status(200).cookie("token",token, {maxAge: 7*24*60*60*1000, httpOnly: true, sameSite: 'lax', secure: false}).json({
-       _id: user._id,
+    const token = await jwt.sign(tokenData, process.env.SECRET_KEY, { expiresIn: "7d" });
+
+    return res.status(200).cookie("token", token, { maxAge: 7 * 24 * 60 * 60 * 1000, httpOnly: true,
+  secure: true,
+  sameSite: "none", }).json({
+      _id: user._id,
       username: user.username,
       profilePhoto: user.profilePhoto,
       about: user.about,
@@ -131,43 +133,43 @@ export const login = async (req, res) => {
   }
 };
 
-export const logout = async (req, res) =>{
-  try{
+export const logout = async (req, res) => {
+  try {
     const cookie = req.cookies.token;
-    if(!cookie) return res.status(400).json({
+    if (!cookie) return res.status(400).json({
       message: "No cookie available",
       success: false,
     })
     return res.status(200).clearCookie("token").json({
-      message:"logout Successful",
+      message: "logout Successful",
       success: true,
     });
-  }catch(error){
+  } catch (error) {
     return res.status(400).json({
-      success:false,
+      success: false,
       message: "Logout failed.",
     })
   }
 };
 
 export const remember = async (req, res) => {
-  try{
+  try {
     const userId = req.id;
-  if(!userId) return res.status(400).json({message: "User not found",success:false});
+    if (!userId) return res.status(400).json({ message: "User not found", success: false });
 
-  const user = await User.findById(userId);
-  if(!user){
-    return res.status(400).json({message: "User not found", success: false});
-  }
-  return res.status(200).json({
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(400).json({ message: "User not found", success: false });
+    }
+    return res.status(200).json({
       _id: user._id,
       username: user.username,
       profilePhoto: user.profilePhoto,
       about: user.about,
       connectedUsers: user.connectedUsers,
       success: true,
-  })
-  }catch(err){
+    })
+  } catch (err) {
     return res.status(400).json({
       message: "Something Wrong",
       success: false,
