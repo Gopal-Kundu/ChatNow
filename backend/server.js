@@ -9,10 +9,9 @@ import { Server } from "socket.io";
 
 dotenv.config();
 const app = express();
-const allowed = process.env.CLIENT_URL;
 app.use(
   cors({
-    origin: allowed,
+    origin: process.env.CLIENT_URL,
     credentials: true,
   })
 );
@@ -25,7 +24,7 @@ app.use("/", routes);
 const server = http.createServer(app);
 export const io = new Server(server, {
   cors: {
-    origin: allowed,
+    origin: process.env.CLIENT_URL,
     credentials: true,
   },
 });
