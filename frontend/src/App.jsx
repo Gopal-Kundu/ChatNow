@@ -20,7 +20,7 @@ const App = () => {
     useEffect(() => {
     const remember = async () => {
       try {
-        const res = await axios.get(`${baseurl}/`, {
+        const res = await axios.get(`${baseurl}/remember`, {
           withCredentials: true,
         });
 

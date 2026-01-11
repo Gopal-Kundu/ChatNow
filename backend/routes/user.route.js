@@ -26,7 +26,7 @@ router.get("/getAllChats", isAuthenticated, getAllChats);
 router.post("/sendmsg/:id", isAuthenticated, sendMessage);
 router.get("/chat/:id", isAuthenticated, getAllMessage);
 router.post("/adduser",isAuthenticated,addUser);
-router.get("/", isAuthenticated, remember);
+router.get("/remember", isAuthenticated, remember);
 router.post(
   "/update/photo", isAuthenticated,
   upload.single("profilePhoto"),
