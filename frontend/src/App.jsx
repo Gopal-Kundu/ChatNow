@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Routes, Route, useNavigate } from "react-router-dom";
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
@@ -17,7 +17,7 @@ export let socket;
 
 const App = () => {
   const user = useSelector((store) => store.auth.user);
-  const loading = useSelector((store)=> store.auth.loading);
+  const [loading, setLoading] = useState(false)
   const dispatch = useDispatch();
   const navigate = useNavigate();
     
@@ -25,6 +25,7 @@ const App = () => {
   useEffect(() => {
       const remember = async () => {
       try {
+         setLoading(true);
         const res = await axios.get(`${baseurl}/remember`, {
           withCredentials: true,
         });
@@ -43,6 +44,8 @@ const App = () => {
         }
       } catch (err) {
         console.error("No active session");
+      }finally{
+       setLoading(false)
       }
     };
     remember();
