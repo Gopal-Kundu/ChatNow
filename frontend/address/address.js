@@ -1,1 +1,1 @@
-export const baseurl = "https://chatnow-production.up.railway.app";
+export const baseurl = "https://chatnow-ns9r.onrender.com";
