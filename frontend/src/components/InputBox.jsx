@@ -16,10 +16,6 @@ function InputBox({ theirId }) {
     socket.on("Msg from sender", (newMessage) => {
       dispatch(setMsg(newMessage));
     });
-
-    socket.on("NewUser", (data) => {
-      dispatch(setNewChat(data));
-    });
   }, [dispatch]);
 
   function handleKeyDown(e) {
