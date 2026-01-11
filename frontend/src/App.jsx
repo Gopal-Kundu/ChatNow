@@ -2,7 +2,6 @@ import React, { useEffect } from "react";
 import { Routes, Route, useNavigate } from "react-router-dom";
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
-import RightSidebar from "./components/RightSidebar";
 import { io } from "socket.io-client";
 import { useDispatch, useSelector } from "react-redux";
 import { baseurl } from "../address/address";
@@ -11,6 +10,7 @@ import UpdateProfilePage from "./pages/UpdateProfilePage";
 import axios from "axios";
 import { setUser } from "../redux/authSlice";
 import { setChats } from "../redux/chatSlice";
+import RightSidebar from "./components/RightSidebar";
 
 export let socket;
 const App = () => {
