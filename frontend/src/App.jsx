@@ -61,7 +61,12 @@ const App = () => {
       dispatch(setOnlineUsers(data));
     })
 
-    return () => socket.disconnect();
+    return () => {
+    socket.off("Connected users");
+    socket.off("Disconnected users");
+    socket.disconnect();
+  };
+
   }, [user]);
  
   if(loading) return <LoadingPage/>
