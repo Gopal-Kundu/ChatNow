@@ -170,9 +170,6 @@ export const sendMessage = async (req, res) => {
         allMessages: [newMessage]
       })
       receiver.connectedUsers = newConversation._id;
-      console.log("Came here 1");
-      console.log(sender);
-      io.to(getSocketId(receiverId)).emit("NewUser", sender);
     } else {
       await Conversation.findByIdAndUpdate(receiverConversationId, {
         $push: {
@@ -186,9 +183,7 @@ export const sendMessage = async (req, res) => {
     await receiver.save();
     await sender.save();
     
-
-
-
+    io.to(getSocketId(receiverId)).emit("NewUser", sender);
     io.to(getSocketId(receiverId)).emit("Msg from sender", newMessage);
     return res.status(200).json({
       message: "Message sent successfully",

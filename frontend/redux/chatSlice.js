@@ -17,7 +17,10 @@ const chatSlice = createSlice({
       state.msgContainer.push(action.payload);
     },
     setNewChat:(state, action) => {
-      state.chats.push(action.payload);
+      const exists = state.chats.find(
+        (u) => u._id === action.payload._id
+      );
+      if (!exists) state.chats.push(action.payload);
     }
   }
 });

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import axios from "axios";
 import { baseurl } from "../../address/address";
-import { setMsg } from "../../redux/chatSlice";
+import { setMsg, setNewChat } from "../../redux/chatSlice";
 import { Send } from "lucide-react";
 import { socket } from "../App";
 
@@ -12,12 +12,14 @@ function InputBox({ theirId }) {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    if (!socket) return;
+    if(!socket) return;
     socket.on("Msg from sender", (newMessage) => {
       dispatch(setMsg(newMessage));
     });
 
-    return () => socket.off("Msg from sender");
+    socket.on("NewUser", (data) => {
+      dispatch(setNewChat(data));
+    });
   }, [dispatch]);
 
   function handleKeyDown(e) {
@@ -27,30 +29,29 @@ function InputBox({ theirId }) {
     }
   }
 
- async function sendMsg() {
-  if (msg.trim() === "") return;
+  async function sendMsg() {
+    if (msg.trim() === "") return;
 
-  const messageToSend = msg;
-  currMsg("");
+    const messageToSend = msg;
+    currMsg("");
 
-  try {
-    const res = await axios.post(
-      `${baseurl}/sendmsg/${theirId}`,
-      { message: messageToSend },
-      {
-        headers: { "Content-Type": "application/json" },
-        withCredentials: true,
+    try {
+      const res = await axios.post(
+        `${baseurl}/sendmsg/${theirId}`,
+        { message: messageToSend },
+        {
+          headers: { "Content-Type": "application/json" },
+          withCredentials: true,
+        }
+      );
+
+      if (res.data.success) {
+        dispatch(setMsg(res.data.newMessage));
       }
-    );
-
-    if (res.data.success) {
-      dispatch(setMsg(res.data.newMessage));
+    } catch (err) {
+      console.log(err);
     }
-  } catch (err) {
-    console.log(err);
   }
-}
-
 
   return (
     <div className="sticky bottom-0 w-full px-4 py-3 bg-gradient-to-t from-black/80 via-black/60 to-transparent backdrop-blur-xl">

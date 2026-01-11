@@ -11,10 +11,13 @@ import axios from "axios";
 import { setUser } from "../redux/authSlice";
 import { setAllMsgs, setChats } from "../redux/chatSlice";
 import { RightSideBar } from "./components/RightSideBar";
+import LoadingPage from "./pages/LoadingPage";
 
 export let socket;
+
 const App = () => {
   const user = useSelector((store) => store.auth.user);
+  const loading = useSelector((store)=> store.auth.loading);
   const dispatch = useDispatch();
   const navigate = useNavigate();
     
@@ -61,6 +64,7 @@ const App = () => {
     return () => socket.disconnect();
   }, [user]);
  
+  if(loading) return <LoadingPage/>
   return (
     <div className="bg-black">
       <Routes>

@@ -71,26 +71,16 @@ function LeftSideBar() {
         });
       }
     } catch (error) {
-      toast.error(
-        error.response?.data?.message || "Failed to add user",
-        { position: "top-center", duration: 2000 }
-      );
+      toast.error(error.response?.data?.message || "Failed to add user", {
+        position: "top-center",
+        duration: 2000,
+      });
     }
   }
-
-  useEffect(() => {
-    if (!socket) return;
-    socket.on("NewUser", (newUser) => {
-      dispatch(setNewChat(newUser));
-    });
-
-    return () => socket.off("NewUser");
-  }, [dispatch]);
 
 
   return (
     <div className="flex flex-col h-screen border-r border-white/20 bg-transparent">
-      
       <div className="flex items-center gap-3 p-4 border-b border-white/20">
         <Link to={`profile/${user._id}`}>
           <div className="h-12 w-12 rounded-full overflow-hidden border-2 border-white cursor-pointer hover:scale-105 transition">
@@ -136,7 +126,7 @@ function LeftSideBar() {
           />
         ))}
       </div>
-      <Footer/>
+      <Footer />
     </div>
   );
 }
