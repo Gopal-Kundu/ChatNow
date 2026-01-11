@@ -8,10 +8,11 @@ import { socket } from "../App";
 
 function InputBox({ theirId }) {
   const [msg, currMsg] = useState("");
+
   const dispatch = useDispatch();
 
   useEffect(() => {
-    if (!socket) return; 
+    if (!socket) return;
     socket.on("Msg from sender", (newMessage) => {
       dispatch(setMsg(newMessage));
     });
@@ -19,35 +20,36 @@ function InputBox({ theirId }) {
     return () => socket.off("Msg from sender");
   }, [dispatch]);
 
-
   function handleKeyDown(e) {
-  if (e.key === "Enter" && !e.shiftKey) {
-    e.preventDefault();
-    sendMsg();
-  }
-}
-
-  async function sendMsg() {
-    if (msg.trim() === "") return;
-
-    try {
-      const res = await axios.post(
-        `${baseurl}/sendmsg/${theirId}`,
-        { message: msg },
-        {
-          headers: { "Content-Type": "application/json" },
-          withCredentials: true,
-        }
-      );
-
-      if (res.data.success) {
-        dispatch(setMsg(res.data.newMessage));
-        currMsg("");
-      }
-    } catch (err) {
-      console.log(err);
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendMsg();
     }
   }
+
+ async function sendMsg() {
+  if (msg.trim() === "") return;
+
+  const messageToSend = msg;
+  currMsg("");
+
+  try {
+    const res = await axios.post(
+      `${baseurl}/sendmsg/${theirId}`,
+      { message: messageToSend },
+      {
+        headers: { "Content-Type": "application/json" },
+        withCredentials: true,
+      }
+    );
+
+    if (res.data.success) {
+      dispatch(setMsg(res.data.newMessage));
+    }
+  } catch (err) {
+    console.log(err);
+  }
+}
 
 
   return (

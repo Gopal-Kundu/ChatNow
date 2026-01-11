@@ -23,7 +23,7 @@ function NavBarforChatPage() {
 
         <div className="relative">
           <div className=" border-black h-11 w-11 rounded-full overflow-hidden border-2 cursor-pointer ml-2">
-            <img src={logo ? logo : defaultImg} alt="Profile-photo" />
+            <img src={logo ? logo : defaultImg} alt="Profile-photo" className="h-full w-full object-cover"/>
           </div>
           <div
             className={`${online?.includes(id) ? "bg-green-700" : ""} h-3 w-3 absolute rounded-full top-8 left-8 z-1`}

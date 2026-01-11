@@ -31,7 +31,7 @@ function ChatPage() {
     fetchData();
   },[dispatch]);
   return (
-    <div className='h-screen bg-[url("./src/assets/Background_SignUp_Login_Page.jpg")] bg-cover bg-center '>
+    <div className='h-screen bg-[url("https://png.pngtree.com/background/20250104/original/pngtree-free-hd-wallpaper-4k-new-background-picture-image_15546678.jpg")] bg-cover bg-center '>
       <div className=" bg-black/50 bg-screen">
         {loading ? <LoadingPage/> : <LeftSideBar />}
       </div>

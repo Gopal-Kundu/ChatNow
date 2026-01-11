@@ -52,7 +52,7 @@ function LoginPage() {
 
   return (
     // Background Image
-    <div className='h-screen bg-[url("./src/assets/Background_SignUp_Login_Page.jpg")] bg-cover bg-center'>
+    <div className='h-screen bg-[url("https://png.pngtree.com/background/20250104/original/pngtree-free-hd-wallpaper-4k-new-background-picture-image_15546678.jpg")] bg-cover bg-center'>
       {/* Navbar */}
       <div className="inter py-4 flex justify-center items-center gap-4">
         <Link to="/">
