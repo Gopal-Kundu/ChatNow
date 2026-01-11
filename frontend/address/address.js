@@ -1,1 +1,1 @@
-export const baseurl = "https://chat-now-backend.vercel.app";
+export const baseurl = "https://chatnow-production.up.railway.app";

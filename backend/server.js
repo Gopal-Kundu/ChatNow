@@ -29,9 +29,7 @@ export const io = new Server(server, {
   cors: {
     origin: CLIENT_URL,
     credentials: true,
-  },
-  path: "/api/socket",
-  addTrailingSlash: false,
+  }
 });
 
 export let onlineUsers = {};
