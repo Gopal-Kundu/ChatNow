@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import { uploadToCloudinary } from "../configs/fileToCloudinary.js";
+import { Conversation } from "../models/conversation.model.js";
 dotenv.config({ quiet: true });
 
 
@@ -93,45 +94,82 @@ export const uploadProfilePhoto = async (req, res) => {
 export const login = async (req, res) => {
   try {
     const { phoneNumber, password } = req.body;
-    if (!phoneNumber || !password)
+
+    if (!phoneNumber || !password) {
       return res.status(400).json({
         message: "Please fill all the boxes",
         success: false,
       });
+    }
+
     const user = await User.findOne({ phoneNumber });
-    if (!user)
+    if (!user) {
       return res.status(400).json({
         message: "You must sign in",
         success: false,
       });
+    }
+
     const isPasswordMatched = await bcrypt.compare(password, user.password);
-    if (!isPasswordMatched)
+    if (!isPasswordMatched) {
       return res.status(400).json({
         message: "Wrong password given.",
         success: false,
       });
-    const tokenData = {
-      userId: user._id,
-    };
-    const token = await jwt.sign(tokenData, process.env.SECRET_KEY, { expiresIn: "7d" });
+    }
 
-    return res.status(200).cookie("token", token, { maxAge: 7 * 24 * 60 * 60 * 1000, httpOnly: true,
-  secure: true,
-  sameSite: "none", }).json({
-      _id: user._id,
-      username: user.username,
-      profilePhoto: user.profilePhoto,
-      about: user.about,
-      connectedUsers: user.connectedUsers,
-      success: true,
-    });
+    const token = jwt.sign(
+      { userId: user._id },
+      process.env.SECRET_KEY,
+      { expiresIn: "7d" }
+    );
+
+    const safeUser = await User.findById(user._id).select(
+      "_id username profilePhoto about connectedUsers"
+    );
+
+    let allMessages = [];
+    let participants = [];
+
+    if (safeUser.connectedUsers) {
+      const conversation = await Conversation.findById(
+        safeUser.connectedUsers
+      )
+        .populate("allMessages")
+        .populate({
+          path: "participants",
+          select: "_id username profilePhoto about",
+        });
+
+      if (conversation) {
+        allMessages = conversation.allMessages || [];
+        participants = conversation.participants || [];
+      }
+    }
+
+    return res
+      .status(200)
+      .cookie("token", token, {
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+        httpOnly: true,
+        sameSite: "lax",
+        secure: false,
+      })
+      .json({
+        success: true,
+        user: safeUser,
+        allMessages,
+        participants,
+      });
+
   } catch (error) {
-    return res.status(400).json({
-      message: "Server errors",
+    return res.status(500).json({
+      message: "Server error",
       success: false,
     });
   }
 };
+
 
 export const logout = async (req, res) => {
   try {
@@ -155,25 +193,55 @@ export const logout = async (req, res) => {
 export const remember = async (req, res) => {
   try {
     const userId = req.id;
-    if (!userId) return res.status(400).json({ message: "User not found", success: false });
-
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(400).json({ message: "User not found", success: false });
+    if (!userId) {
+      return res.status(401).json({
+        message: "Unauthorized",
+        success: false,
+      });
     }
+
+    const user = await User.findById(userId).select(
+      "_id username profilePhoto about connectedUsers"
+    );
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+        success: false,
+      });
+    }
+
+    let allMessages = [];
+    let participants = [];
+
+    if (user.connectedUsers) {
+      const conversation = await Conversation.findById(user.connectedUsers)
+        .populate("allMessages")
+        .populate({
+          path: "participants",
+          select: "_id username profilePhoto about",
+        });
+
+      if (conversation) {
+        allMessages = conversation.allMessages || [];
+        participants = conversation.participants || [];
+      }
+    }
+
     return res.status(200).json({
-      _id: user._id,
-      username: user.username,
-      profilePhoto: user.profilePhoto,
-      about: user.about,
-      connectedUsers: user.connectedUsers,
       success: true,
-    })
+      user,
+      allMessages,
+      participants,
+    });
+
   } catch (err) {
-    return res.status(400).json({
-      message: "Something Wrong",
+    console.error(err);
+    return res.status(500).json({
+      message: "server error",
       success: false,
-    })
+    });
   }
-}
+};
+
 

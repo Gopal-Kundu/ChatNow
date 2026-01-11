@@ -29,7 +29,7 @@ function Chats({ id, name, logo}) {
       </Link>
       <span
         className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-black
-        ${online.includes(id) ? "bg-green-500" : "bg-gray-500"}`}
+        ${online?.includes(id) ? "bg-green-500" : "bg-gray-500"}`}
       />
     </div>
     <div onClick={openChat} className="flex-1 min-w-0">

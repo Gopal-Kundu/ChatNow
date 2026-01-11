@@ -9,7 +9,7 @@ import { setOnlineUsers } from "../redux/socketSlice";
 import UpdateProfilePage from "./pages/UpdateProfilePage";
 import axios from "axios";
 import { setUser } from "../redux/authSlice";
-import { setChats } from "../redux/chatSlice";
+import { setAllMsgs, setChats } from "../redux/chatSlice";
 import { RightSideBar } from "./components/RightSideBar";
 
 export let socket;
@@ -17,15 +17,19 @@ const App = () => {
   const user = useSelector((store) => store.auth.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-    useEffect(() => {
-    const remember = async () => {
+    
+  
+  useEffect(() => {
+      const remember = async () => {
       try {
         const res = await axios.get(`${baseurl}/remember`, {
           withCredentials: true,
         });
 
         if (res.data.success) {
-          dispatch(setUser(res.data));
+          dispatch(setUser(res.data.user));
+          dispatch(setAllMsgs(res.data.allMessages));
+          dispatch(setChats(res.data.participants));
         }
 
         const res2 = await axios.get(`${baseurl}/getAllChats`,{
@@ -38,9 +42,8 @@ const App = () => {
         console.error("No active session");
       }
     };
-
     remember();
-  }, [dispatch]);
+  }, []);
 
 
   useEffect(()=>{

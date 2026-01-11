@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { baseurl } from "../../address/address.js";
 import { setLoading, setUser } from "../../redux/authSlice";
 import { Link, useNavigate } from "react-router-dom";
+import { setAllMsgs, setChats } from "../../redux/chatSlice.js";
 
 function LoginPage() {
   const [formData, setFormData] = useState({
@@ -22,18 +23,19 @@ function LoginPage() {
     e.preventDefault();
     dispatch(setLoading(true));
     try {
-      const response = await axios.post(`${baseurl}/login`, formData, {
+      const res = await axios.post(`${baseurl}/login`, formData, {
         headers: { "Content-Type": "application/json" },
         withCredentials: true,
       });
-      if (response.data.success) {
-        if (response.data.success) {
+      if (res.data.success) {
+        if (res.data.success) {
           toast.success("Login Successful!", {
             position: "top-center",
             duration: 2000,
           });
-          // console.log(response.data);
-          dispatch(setUser(response.data));
+          dispatch(setUser(res.data.user));
+          dispatch(setAllMsgs(res.data.allMessages));
+          dispatch(setChats(res.data.participants));
           navigate("/");
         }
       }

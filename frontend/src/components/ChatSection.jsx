@@ -1,38 +1,20 @@
-import React, { useEffect } from "react";
+import React from "react";
 import LoadingPage from "../pages/LoadingPage";
 import Message from "../components/Message";
-import { useDispatch, useSelector } from "react-redux";
-import { setLoading } from "../../redux/authSlice";
-import axios from "axios";
-import { setAllMsgs } from "../../redux/chatSlice";
-import { baseurl } from "../../address/address";
+import { useSelector } from "react-redux";
+import { useParams } from "react-router-dom";
 
 function ChatSection({ theirId }) {
-  const dispatch = useDispatch();
-  const loading = useSelector((state) => state.auth?.loading);
-  const msgs = useSelector((state) => state.chat?.msgContainer);
+  const loading = useSelector((state) => state.auth.loading);
+  const user = useSelector((state) => state.auth.user);
+  const allMsgs = useSelector((state) => state.chat.msgContainer || []);
+  const { id } = useParams();
 
-  useEffect(() => {
-    async function fetchData() {
-      dispatch(setAllMsgs([]));
-      try {
-        dispatch(setLoading(true));
-        const res = await axios.get(`${baseurl}/chat/${theirId}`, {
-          withCredentials: true,
-        });
-
-        if (res.data.success) {
-          dispatch(setAllMsgs(res.data.messages));
-        }
-      } catch (error) {
-        console.log(error.response);
-      } finally {
-        dispatch(setLoading(false));
-      }
-    }
-
-    fetchData();
-  }, [theirId]);
+  const filteredMsgs = allMsgs.filter(
+    (msg) =>
+      (msg.receiverId === id && msg.senderId === user._id) ||
+      (msg.senderId === id && msg.receiverId === user._id)
+  );
 
   return (
     <div className="webkit-scrollbar flex-1 overflow-y-auto">
@@ -40,15 +22,13 @@ function ChatSection({ theirId }) {
         <LoadingPage />
       ) : (
         <div>
-          {msgs.map((arr, idx) => {
-            return (
-              <Message
-                key={idx}
-                user={theirId === arr.senderId ? "false" : "true"}
-                text={arr.message}
-              />
-            );
-          })}
+          {filteredMsgs.map((msg, idx) => (
+            <Message
+              key={idx}
+              user={theirId === msg?.senderId ? "false" : "true"}
+              text={msg.message}
+            />
+          ))}
         </div>
       )}
     </div>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { LogOut, CirclePlus } from "lucide-react";
 import Chats from "./Chats";
 import { useDispatch, useSelector } from "react-redux";
@@ -15,6 +15,7 @@ import { setUser } from "../../redux/authSlice";
 import { baseurl } from "../../address/address";
 import { toast } from "sonner";
 import Footer from "./Footer";
+import { socket } from "../App";
 
 function LeftSideBar() {
   const dispatch = useDispatch();
@@ -77,6 +78,16 @@ function LeftSideBar() {
     }
   }
 
+  useEffect(() => {
+    if (!socket) return;
+    socket.on("NewUser", (newUser) => {
+      dispatch(setNewChat(newUser));
+    });
+
+    return () => socket.off("NewUser");
+  }, [dispatch]);
+
+
   return (
     <div className="flex flex-col h-screen border-r border-white/20 bg-transparent">
       
@@ -116,7 +127,7 @@ function LeftSideBar() {
       </div>
 
       <div className="flex-1 overflow-y-auto">
-        {chat.map((perChat) => (
+        {chat?.map((perChat) => (
           <Chats
             key={perChat._id}
             id={perChat._id}
