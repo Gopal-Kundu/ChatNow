@@ -9,21 +9,20 @@ import { baseurl } from "../../address/address";
 
 function ChatSection({ theirId }) {
   const dispatch = useDispatch();
-  const loading = useSelector((state) => state.auth.loading);
-  const msgs = useSelector((state) => state.chat.msgContainer);
+  const loading = useSelector((state) => state.auth?.loading);
+  const msgs = useSelector((state) => state.chat?.msgContainer);
 
   useEffect(() => {
     async function fetchData() {
       dispatch(setAllMsgs([]));
       try {
         dispatch(setLoading(true));
-        const res = await axios.get(`${baseurl}/${theirId}`, {
+        const res = await axios.get(`${baseurl}/chat/${theirId}`, {
           withCredentials: true,
         });
 
         if (res.data.success) {
           dispatch(setAllMsgs(res.data.messages));
-          // console.log("Data at chatSection", res.data.messages);
         }
       } catch (error) {
         console.log(error.response);

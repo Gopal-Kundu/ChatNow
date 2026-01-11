@@ -41,8 +41,7 @@ function ProfileForm({ open, setOpen }) {
       }
 
       if (photo && photo !== logo) {
-        await axios.post(`${baseurl}/update/photo`, image, {
-          headers: { "Content-Type": "multipart/form-data" },
+        const res2 = await axios.post(`${baseurl}/update/photo`, image, {
           withCredentials: true,
         });
 
@@ -51,7 +50,7 @@ function ProfileForm({ open, setOpen }) {
         }
       }
 
-      setOpen(false); // close modal after success
+      setOpen(false);
     } catch (error) {
       console.error(error);
     }
@@ -68,7 +67,6 @@ function ProfileForm({ open, setOpen }) {
             Update Profile
           </h2>
 
-          {/* Profile Photo */}
           <div className="flex flex-col items-center">
             <label htmlFor="profilePhoto" className="cursor-pointer">
               <img

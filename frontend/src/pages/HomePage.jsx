@@ -1,7 +1,7 @@
 import React from 'react'
 import { useSelector } from 'react-redux'
 import Signup from './Signup';
-import ChatPage from './chatPage';
+import ChatPage from './ChatPage';
 function HomePage() {
     const user = useSelector((state) => state.auth.user);
   return (

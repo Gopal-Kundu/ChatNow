@@ -9,7 +9,7 @@ import { setLoading } from "../../redux/authSlice.js";
 function Signup() {
   const [formData, setFormData] = useState({
     username: "",
-    email: "",
+    phoneNumber: "",
     password: "",
   });
   const dispatch = useDispatch();
@@ -91,11 +91,11 @@ function Signup() {
             required
           />
           <input
-            type="text"
-            name="email"
+            type="number"
+            name="phoneNumber"
             value={formData.email}
             onChange={handleChange}
-            placeholder="Email"
+            placeholder="Phone Number"
             className="px-5 bg-white/40 p-3 rounded-3xl outline-none focus:bg-white/90 block w-90 transition-colors duration-400 inter"
             required
           />

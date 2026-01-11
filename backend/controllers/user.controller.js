@@ -2,28 +2,29 @@ import { User } from "../models/user.model.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
-import getDataUri from "../configs/datauri.js";
-import cloudinary from "../configs/cloudinary.js";
+import { uploadToCloudinary } from "../configs/fileToCloudinary.js";
 dotenv.config({quiet : true});
+
+
 export const register = async (req, res) => {
   try {
-    const { username, email, password } = req.body;
-    if (!email || !username || !password)
+    const { username, phoneNumber, password } = req.body;
+    if (!phoneNumber || !username || !password)
       return res.status(400).json({
         message: "All fields are required to sign up.",
         success: false,
       });
-    let isEmailFound = await User.findOne({ email });
-    if (isEmailFound) {
+    let isPhoneNumberFound = await User.findOne({ phoneNumber });
+    if (isPhoneNumberFound) {
       return res.status(400).json({
-        message: "Email already exist",
+        message: "Phone Number already exist",
         success: false,
       });
     }
     const hashedPassword = await bcrypt.hash(password, 10);
     await User.create({
       username,
-      email,
+      phoneNumber,
       password: hashedPassword,
     });
     return res.status(201).json({
@@ -37,6 +38,7 @@ export const register = async (req, res) => {
     });
   }
 };
+
 
 export const update = async (req, res) => {
   try {
@@ -65,19 +67,15 @@ export const update = async (req, res) => {
     });
   }
 };
+
+
 export const uploadProfilePhoto = async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ message: "No file uploaded" });
     }
-    const file64 = getDataUri(req.file).content;
-
-    const result = await cloudinary.uploader.upload(file64, {
-      folder: "profilePhotos",
-    });
-
     const user = await User.findById(req.id);
-    user.profilePhoto = result.secure_url;
+    user.profilePhoto = await uploadToCloudinary(req.file);
     await user.save();
     return res.status(200).json({
       message: "Profile photo uploaded successfully",
@@ -90,15 +88,17 @@ export const uploadProfilePhoto = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+
 export const login = async (req, res) => {
   try {
-    const { email, password } = req.body;
-    if (!email || !password)
+    const { phoneNumber, password } = req.body;
+    if (!phoneNumber || !password)
       return res.status(400).json({
         message: "Please fill all the boxes",
         success: false,
       });
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ phoneNumber });
     if (!user)
       return res.status(400).json({
         message: "You must sign in",
@@ -115,11 +115,12 @@ export const login = async (req, res) => {
     };
     const token = await jwt.sign(tokenData, process.env.SECRET_KEY, {expiresIn: "7d"});
    
-    return res.status(200).cookie("token",token, {maxAge: 7*24*60*60*1000, httpOnly: true, sameSite: 'strict', secure: false}).json({
+    return res.status(200).cookie("token",token, {maxAge: 7*24*60*60*1000, httpOnly: true, sameSite: 'lax', secure: false}).json({
        _id: user._id,
       username: user.username,
       profilePhoto: user.profilePhoto,
       about: user.about,
+      connectedUsers: user.connectedUsers,
       success: true,
     });
   } catch (error) {
@@ -149,4 +150,28 @@ export const logout = async (req, res) =>{
   }
 };
 
+export const remember = async (req, res) => {
+  try{
+    const userId = req.id;
+  if(!userId) return res.status(400).json({message: "User not found",success:false});
+
+  const user = await User.findById(userId);
+  if(!user){
+    return res.status(400).json({message: "User not found", success: false});
+  }
+  return res.status(200).json({
+      _id: user._id,
+      username: user.username,
+      profilePhoto: user.profilePhoto,
+      about: user.about,
+      connectedUsers: user.connectedUsers,
+      success: true,
+  })
+  }catch(err){
+    return res.status(400).json({
+      message: "Something Wrong",
+      success: false,
+    })
+  }
+}
 

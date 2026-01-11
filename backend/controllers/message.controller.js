@@ -1,4 +1,3 @@
-import { json } from "express";
 import { Conversation } from "../models/conversation.model.js";
 import { Message } from "../models/message.model.js";
 import { User } from "../models/user.model.js";
@@ -8,25 +7,111 @@ import { io, onlineUsers } from "../server.js";
 
 dotenv.config({ quiet: true });
 
+
 export const getAllChats = async (req, res) => {
   try {
     const userId = req.id;
-    const users = await User.find({ _id: { $ne: userId } }).select(
-      "-password -email"
-    );
-    if (users.length === 0) {
+    const user = await User.findById(userId);
+    if (!user) {
       return res.status(400).json({
         message: "No User found",
         success: false,
       });
     }
+    const allUsers = await Conversation.findById(user.connectedUsers);
+    if (!allUsers) {
+      return res.status(400).json({
+        message: "No Chats Found",
+        success: false,
+      });
+    }
+
+    await allUsers.populate({
+      path: "participants",
+      select: "profilePhoto username",
+    });
+
     return res.status(200).json({
       message: "All User found Successfully",
-      users,
+      allUsers,
       success: true,
     });
   } catch (error) {
     return res.status(401).json({
+      message: "Server error",
+      success: false,
+    });
+  }
+};
+
+export const addUser = async (req, res) => {
+  try {
+    const userId = req.id;
+    const { phoneNumber } = req.body;
+
+    if (!userId || !phoneNumber) {
+      return res.status(400).json({
+        message: "Something missing",
+        success: false,
+      });
+    }
+
+
+
+    const newUser = await User.findOne({ phoneNumber });
+    if (!newUser) {
+      return res.status(400).json({
+        message: "No User Found",
+        success: false,
+      });
+    }
+
+    const newUserId = newUser._id;
+
+    if (newUserId.equals(userId)) {
+      return res.status(400).json({
+        success: false,
+        message: "You cannot add yourself",
+      });
+    }
+
+    const user = await User.findById(userId);
+    let conversation = await Conversation.findById(user.connectedUsers);
+    if (!conversation) {
+      conversation = await Conversation.create({
+        participants: [newUserId],
+        allMessages: [],
+      });
+      user.connectedUsers = conversation._id;
+      await user.save();
+    } else {
+      const exists = await Conversation.findOne({
+        _id: user.connectedUsers,
+        participants: newUserId,
+      });
+      if (exists)
+        return res.status(400).json({
+          message: "User already exists at chatlist.",
+          success: true,
+        });
+      else conversation.participants.push(newUserId);
+    }
+
+
+    await conversation.save();
+
+    return res.status(200).json({
+      message: "New user added successfully",
+      newUser: {
+        _id: newUser._id,
+        profilePhoto: newUser.profilePhoto,
+        username: newUser.username,
+      },
+      success: true,
+    });
+
+  } catch (error) {
+    return res.status(500).json({
       message: "Server error",
       success: false,
     });
@@ -57,20 +142,47 @@ export const sendMessage = async (req, res) => {
       message,
     });
 
-    let conversation = await Conversation.findOne({
-      participants: { $all: [senderId, receiverId] },
-    });
-    if (!conversation) {
-      conversation = await Conversation.create({
-        participants: [senderId, receiverId],
-        allMessages: [newMessage._id],
-      });
+    let sender = await User.findById(senderId);
+    let senderConversationId = sender.connectedUsers;
+
+    if (!senderConversationId) {
+      const newConversation = await Conversation.create({
+        participants: [receiverId],
+        allMessages: [newMessage._id]
+      })
+      sender.connectedUsers = newConversation._id;
     } else {
-      conversation.allMessages.push(newMessage._id);
-      await conversation.save();
+      await Conversation.findByIdAndUpdate(senderConversationId, {
+        $push: {
+          allMessages: newMessage._id
+        },
+        $addToSet: {
+          participants: receiverId,
+        }
+      })
     }
 
-    //SOCKET.IO
+    let receiverConversationId = receiver.connectedUsers;
+
+    if (!receiverConversationId) {
+      const newConversation = await Conversation.create({
+        participants: [senderId],
+        allMessages: [newMessage]
+      })
+      receiver.connectedUsers = newConversation._id;
+    } else {
+      await Conversation.findByIdAndUpdate(receiverConversationId, {
+        $push: {
+          allMessages: newMessage
+        },
+        $addToSet: {
+          participants: senderId,
+        }
+      })
+    }
+    await receiver.save();
+    await sender.save();
+
     io.to(getSocketId(receiverId)).emit("Msg from sender", newMessage);
     return res.status(200).json({
       message: "Message sent successfully",
@@ -85,31 +197,55 @@ export const sendMessage = async (req, res) => {
   }
 };
 
-function getSocketId(recieverId){
+function getSocketId(recieverId) {
   return onlineUsers[recieverId];
 }
 
-export const getAllMessage = async (req, res) =>{
-    try{
-        const senderId = req.id;
-        const receiverId = req.params.id;
-        const conversation = await Conversation.findOne({
-            participants: { $all: [senderId, receiverId] },
-        }).populate("allMessages");
-        if(!conversation){
-            return res.status(400).json({
-                success: false,
-                message: "No conversation found",
-            })
-        }
-        return res.status(200).json({
-            success: true,
-            messages: conversation.allMessages,
-        })
-    }catch(error){
-        return json.status(400).json({
-            message: "Server error",
+export const getAllMessage = async (req, res) => {
+  try {
+    const senderId = req.id;
+    const receiverId = req.params.id;
+
+    if (!senderId || !receiverId) {
+      return res.status(400).json({
         success: false,
-        })
+        message: "Something is missing",
+      });
     }
-}
+
+    const sender = await User.findById(senderId);
+    if (!sender || !sender.connectedUsers) {
+      return res.status(400).json({
+        success: false,
+        message: "No conversation found",
+      });
+    }
+
+    const conversation = await Conversation
+      .findById(sender.connectedUsers)
+      .populate("allMessages");
+
+    if (!conversation) {
+      return res.status(400).json({
+        success: false,
+        message: "No conversation found",
+      });
+    }
+
+    const messages = conversation.allMessages.filter(msg =>
+      (msg.senderId.equals(senderId) && msg.receiverId.equals(receiverId)) ||
+      (msg.senderId.equals(receiverId) && msg.receiverId.equals(senderId))
+    );
+
+    return res.status(200).json({
+      success: true,
+      messages,
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};

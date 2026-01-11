@@ -1,4 +1,5 @@
 import {
+  addUser,
   getAllChats,
   getAllMessage,
   sendMessage,
@@ -7,6 +8,7 @@ import {
   login,
   logout,
   register,
+  remember,
   update,
   uploadProfilePhoto,
 } from "../controllers/user.controller.js";
@@ -21,12 +23,16 @@ router.post("/login", login);
 router.get("/logout", logout);
 
 router.get("/getAllChats", isAuthenticated, getAllChats);
-router.post("/:id", isAuthenticated, sendMessage);
-router.get("/:id", isAuthenticated, getAllMessage);
+router.post("/sendmsg/:id", isAuthenticated, sendMessage);
+router.get("/chat/:id", isAuthenticated, getAllMessage);
+router.post("/adduser",isAuthenticated,addUser);
+router.get("/", isAuthenticated, remember);
 router.post(
   "/update/photo", isAuthenticated,
-  upload.single("file"),
+  upload.single("profilePhoto"),
   uploadProfilePhoto
 );
+
+
 
 export default router;

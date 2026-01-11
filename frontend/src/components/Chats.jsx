@@ -1,39 +1,45 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import defaultImg from "../assets/defaultUser.png";
 import { useSelector } from "react-redux";
 function Chats({ id, name, logo}) {
   const navigate = useNavigate();
 
   function openChat() {
-    navigate(`/${id}`);
+    navigate(`chat/${id}`);
   }
   const online = useSelector((store)=>store.socket.onlineUsers);
   return (
-    <div onClick={openChat} className="select-none">
-      {/* Chats  */}
-      <div className="flex flex-row p-2 w-full bg-white/20 h-1/8 border border-b-black">
-        {/* Picture */}
-        <div className="relative">
-          <div className=" border-black h-11 w-11 rounded-full overflow-hidden border-2 cursor-pointer">
-            <img src={logo ? logo : defaultImg} alt="Profile-photo" />
-          </div>
-          <div
-            className={`${online.includes(id) ? "bg-green-700":""} h-3 w-3 absolute rounded-full top-8 left-8 z-1`}
-          ></div>
-        </div>
-        {/* name and text */}
-        <div className="flex-1">
-          <div className="overflow-hidden cursor-pointer h-7  ml-4 text-white text-md font-bold inter">
-            {name}
-          </div>
-          <div className="overflow-hidden cursor-pointer h-5  ml-4 text-white text-[12px]">
-            This is the last message Lorem ipsum dolor sit amet consectetur
-            adipisicing elit. Autem quis, tenetur ab officia unde, beatae tem
-          </div>
-        </div>
+    <div
+  className="select-none cursor-pointer"
+>
+  <div className="flex items-center gap-3 px-4 py-3 w-full
+                  bg-white/10 hover:bg-white/20
+                  transition-colors duration-200
+                  border-b border-white/10">
+    <div className="relative shrink-0">
+      <Link to={`profile/${id}`}>
+      <div className="h-11 w-11 rounded-full overflow-hidden border border-white/20">
+        <img
+          src={logo || defaultImg}
+          alt="Profile"
+          className="h-full w-full object-cover"
+        />
       </div>
+      </Link>
+      <span
+        className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-black
+        ${online.includes(id) ? "bg-green-500" : "bg-gray-500"}`}
+      />
     </div>
+    <div onClick={openChat} className="flex-1 min-w-0">
+      <p className="text-white font-semibold text-2xl truncate">
+        {name}
+      </p>
+    </div>
+  </div>
+</div>
+
   );
 }
 

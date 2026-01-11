@@ -8,7 +8,7 @@ import { Link, useNavigate } from "react-router-dom";
 
 function LoginPage() {
   const [formData, setFormData] = useState({
-    email: "",
+    phoneNumber: "",
     password: "",
   });
   const dispatch = useDispatch();
@@ -88,11 +88,11 @@ function LoginPage() {
           onSubmit={handleSubmit}
         >
           <input
-            type="text"
-            name="email"
+            type="number"
+            name="phoneNumber"
             value={formData.email}
             onChange={handleChange}
-            placeholder="Email"
+            placeholder="Phone Number"
             className="px-5 bg-white/40 p-3 rounded-3xl outline-none focus:bg-white/90 block w-90 transition-colors duration-400 inter"
             required
           />

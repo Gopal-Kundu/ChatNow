@@ -19,7 +19,7 @@ function ChatPage() {
           withCredentials: true,
         });
         if (res.data.success) {
-          dispatch(setChats(res.data.users));
+          dispatch(setChats(res.data.allUsers.participants));
         }
       } catch (error) {
         console.log("Error fetching data:", error);

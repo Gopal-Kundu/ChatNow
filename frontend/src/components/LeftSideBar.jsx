@@ -1,57 +1,128 @@
 import React, { useState } from "react";
-import { Search } from "lucide-react";
-import { CirclePlus } from "lucide-react";
+import { LogOut, CirclePlus } from "lucide-react";
 import Chats from "./Chats";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import defaultImg from "../assets/defaultUser.png";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
+import {
+  setAllMsgs,
+  setChats,
+  setMsg,
+  setNewChat,
+} from "../../redux/chatSlice";
+import { setUser } from "../../redux/authSlice";
+import { baseurl } from "../../address/address";
+import { toast } from "sonner";
 
 function LeftSideBar() {
-  const chat = useSelector((state) => state.chat.chats);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const chat = useSelector((state) => state.chat.chats) || [];
   const user = useSelector((state) => state.auth.user);
-  const [search, setSearch] = useState("");
-  const logo = user?.profilePhoto;
-  // console.log(chat);
+
+  const [phoneNumber, setPhoneNumber] = useState("");
+
+  const logo = user?.profilePhoto || defaultImg;
+
+  async function handleLogout() {
+    try {
+      const res = await axios.get(`${baseurl}/logout`, {
+        withCredentials: true,
+      });
+
+      if (res.data.success) {
+        dispatch(setChats([]));
+        dispatch(setAllMsgs([]));
+        dispatch(setMsg(null));
+        dispatch(setUser(null));
+        navigate("/login");
+      }
+    } catch (err) {
+      toast.error("Logout failed");
+    }
+  }
+
+  async function addUserToChat() {
+    if (!phoneNumber.trim()) {
+      toast.error("Enter phone number");
+      return;
+    }
+
+    try {
+      const res = await axios.post(
+        `${baseurl}/adduser`,
+        { phoneNumber },
+        {
+          withCredentials: true,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+
+      if (res.data.success) {
+        dispatch(setNewChat(res.data.newUser));
+        setPhoneNumber("");
+        toast.success("New user added", {
+          position: "top-center",
+          duration: 2000,
+        });
+      }
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message || "Failed to add user",
+        { position: "top-center", duration: 2000 }
+      );
+    }
+  }
+
   return (
-    <div className="bg-transparent max-h-screen border border-white   flex flex-col">
-      {/* Search Bar div  */}
-      <div className="py-4 border border-white bg-white/40 flex items-center justify-center gap-3">
-        <Link to="/update">
-          <div className=" border-black h-10 w-10 rounded-full overflow-hidden border-2 cursor-pointer">
-            <img src={logo ? logo : defaultImg} alt="Profile-photo" />
+    <div className="flex flex-col h-screen border-r border-white/20 bg-transparent">
+      
+      <div className="flex items-center gap-3 p-4 border-b border-white/20">
+        <Link to={`profile/${user._id}`}>
+          <div className="h-12 w-12 rounded-full overflow-hidden border-2 border-white cursor-pointer hover:scale-105 transition">
+            <img
+              src={logo}
+              alt="Profile"
+              className="w-full h-full object-cover"
+            />
           </div>
         </Link>
-        <div className="relative">
+
+        <div className="relative flex-1">
           <input
             type="text"
-            placeholder="Search Conversations"
-            className="border border-white focus:bg-white bg-white/50 rounded-xl ml-1 pl-9 w-70 outline-none py-1"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Add user by number"
+            value={phoneNumber}
+            onChange={(e) => setPhoneNumber(e.target.value)}
+            className="w-full px-3 py-2 rounded-xl bg-white/20 border border-white/30 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-
-          <div className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-500 ">
-            <Search />
-          </div>
         </div>
-        <CirclePlus className="text-white size-7 cursor-pointer" />
+
+        <CirclePlus
+          onClick={addUserToChat}
+          className="text-white w-6 h-6 cursor-pointer hover:text-blue-400"
+        />
+
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/20 hover:bg-red-500/80 text-white transition"
+        >
+          <LogOut size={18} />
+          <span className="hidden md:block">Logout</span>
+        </button>
       </div>
 
-      <div className="webkit-scrollbar overflow-y-auto flex-1">
-        {chat
-          ?.filter((perChat) =>
-            perChat?.username.toLowerCase().includes(search.toLowerCase())
-          )
-          ?.map((perChat, idx) => {
-            return (
-              <Chats
-                key={idx}
-                id={perChat?._id}
-                name={perChat?.username}
-                logo={perChat?.profilePhoto}
-              />
-            );
-          })}
+      <div className="flex-1 overflow-y-auto">
+        {chat.map((perChat) => (
+          <Chats
+            key={perChat._id}
+            id={perChat._id}
+            name={perChat.username}
+            logo={perChat.profilePhoto}
+          />
+        ))}
       </div>
     </div>
   );
