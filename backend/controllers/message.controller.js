@@ -167,13 +167,21 @@ export const sendMessage = async (req, res) => {
     if (!receiverConversationId) {
       const newConversation = await Conversation.create({
         participants: [senderId],
-        allMessages: [newMessage]
+        allMessages: [newMessage._id]
       })
       receiver.connectedUsers = newConversation._id;
+      io.to(getSocketId(receiverId)).emit("New_Chat", sender);
     } else {
+      const receiverConversation = await Conversation.findById(receiverConversationId);
+      const isNewChat = !receiverConversation.participants.includes(senderId);
+
+      if (isNewChat) {
+        io.to(getSocketId(receiverId)).emit("New_Chat", sender);
+      }
+
       await Conversation.findByIdAndUpdate(receiverConversationId, {
         $push: {
-          allMessages: newMessage
+          allMessages: newMessage._id
         },
         $addToSet: {
           participants: senderId,
@@ -182,7 +190,7 @@ export const sendMessage = async (req, res) => {
     }
     await receiver.save();
     await sender.save();
-    
+
     io.to(getSocketId(receiverId)).emit("Msg from sender", newMessage);
     return res.status(200).json({
       message: "Message sent successfully",
@@ -246,6 +254,44 @@ export const getAllMessage = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Server error",
+    });
+  }
+};
+
+export const deleteChat = async (req, res) => {
+  try {
+    const userId = req.id;
+    const deleteUserId = req.params.id;
+
+    const user = await User.findById(userId);
+    const conversationId = user.connectedUsers;
+
+    const messages = await Message.find({
+      $or: [
+        { senderId: userId, receiverId: deleteUserId },
+        { senderId: deleteUserId, receiverId: userId }
+      ]
+    }).select("_id");
+
+    const messageIds = messages.map(m => m._id);
+
+    await Conversation.findByIdAndUpdate(conversationId, {
+      $pull: {
+        participants: deleteUserId,
+        allMessages: { $in: messageIds }
+      }
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Deleted user",
+      deleteUserId,
+    });
+
+  } catch (err) {
+    return res.status(400).json({
+      success: false,
+      message: "Failed to delete",
     });
   }
 };

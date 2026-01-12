@@ -9,7 +9,7 @@ import { setOnlineUsers } from "../redux/socketSlice";
 import UpdateProfilePage from "./pages/UpdateProfilePage";
 import axios from "axios";
 import { setUser } from "../redux/authSlice";
-import { setAllMsgs, setChats } from "../redux/chatSlice";
+import { setAllMsgs, setChats, setMsg, setNewChat } from "../redux/chatSlice";
 import { RightSideBar } from "./components/RightSideBar";
 import LoadingPage from "./pages/LoadingPage";
 
@@ -71,6 +71,22 @@ const App = () => {
   };
 
   }, [user]);
+
+  useEffect(() => {
+  if (!socket) return;
+  const handleIncomingMessage = (newMessage) => {
+    dispatch(setMsg(newMessage));
+  };
+  const handleIncomingChat = (newChat) => {
+    dispatch(setNewChat(newChat));
+  }
+  socket.on("New_Chat", handleIncomingChat);
+  socket.on("Msg from sender", handleIncomingMessage);
+  return () => {
+    socket.off("New_Chat", handleIncomingChat);
+    socket.off("Msg from sender", handleIncomingMessage);
+  };
+}, [user]);
  
   if(loading) return <LoadingPage/>
   return (

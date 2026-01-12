@@ -1,5 +1,6 @@
 import {
   addUser,
+  deleteChat,
   getAllChats,
   getAllMessage,
   sendMessage,
@@ -32,7 +33,7 @@ router.post(
   upload.single("profilePhoto"),
   uploadProfilePhoto
 );
-
+router.get("/deleteChat/:id",isAuthenticated, deleteChat);
 
 
 export default router;
