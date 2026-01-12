@@ -35,7 +35,7 @@ function Signup() {
       }
       navigate("/login");
     } catch (error) {
-      toast.error(error.response.data, {
+      toast.error(error.response.data.message , {
         position: "top-center",
         duration: 1000,
       });
