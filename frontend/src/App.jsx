@@ -35,13 +35,6 @@ const App = () => {
           dispatch(setAllMsgs(res.data.allMessages));
           dispatch(setChats(res.data.participants));
         }
-
-        const res2 = await axios.get(`${baseurl}/getAllChats`,{
-          withCredentials: true,
-        });
-        if (res2.data.success) {
-          dispatch(setChats(res2.data.allUsers.participants));
-        }
       } catch (err) {
         console.error("No active session");
       }finally{
