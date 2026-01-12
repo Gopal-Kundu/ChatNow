@@ -7,9 +7,10 @@ import { deleteUser } from "../../redux/chatSlice";
 import axios from "axios";
 import { baseurl } from "../../address/address";
 function Chats({ id, name, logo }) {
-  const navigate = useNavigate();
+  
   const dispatch = useDispatch();
   const [showPopup, setShowPopup] = useState(false);
+  const navigate = useNavigate();
   function openChat() {
     navigate(`chat/${id}`);
   }

@@ -7,6 +7,7 @@ import { useParams } from "react-router-dom";
 function UpdateProfilePage() {
   const currentUser = useSelector((store) => store.auth.user);
   const chats = useSelector((store) => store.chat.chats);
+  const onlineUsers = useSelector((store) => store.socket.onlineUsers);
 
   const [showEdit, setShowEdit] = useState(false);
   const [chatUser, setChatUser] = useState(null);
@@ -15,10 +16,12 @@ function UpdateProfilePage() {
   const { id } = useParams();
 
   useEffect(() => {
-    const user = chats?.find((u) => u._id === id);
+    if (!id) return;
 
-    if (user) {
-      setChatUser(user);
+    const userFromChats = chats?.find((u) => u._id === id);
+
+    if (userFromChats) {
+      setChatUser(userFromChats);
       setShowEdit(false);
     } else {
       setChatUser(currentUser);
@@ -26,18 +29,24 @@ function UpdateProfilePage() {
     }
   }, [id, chats, currentUser]);
 
+  const isOnline = onlineUsers.includes(id);
+
   return (
     <div className="min-h-screen w-full bg-[#121212] flex justify-center items-start pt-12 font-inter text-white px-4">
       {open && <ProfileForm open={open} setOpen={setOpen} />}
 
       <div className="w-full max-w-md bg-[#1e1e2f] rounded-2xl shadow-2xl flex flex-col items-center p-8 gap-6">
+        
         <div className="relative">
           <img
             src={chatUser?.profilePhoto || logo}
             alt="Profile"
             className="w-36 h-36 md:w-40 md:h-40 rounded-full object-cover border-4 border-blue-500 shadow-lg"
           />
-          <div className="absolute bottom-2 right-2 w-4 h-4 md:w-5 md:h-5 bg-green-500 border-2 border-[#1e1e2f] rounded-full"></div>
+
+          {isOnline && (
+            <div className="absolute bottom-2 right-2 w-4 h-4 md:w-5 md:h-5 bg-green-500 border-2 border-[#1e1e2f] rounded-full"></div>
+          )}
         </div>
 
         <div className="text-center">

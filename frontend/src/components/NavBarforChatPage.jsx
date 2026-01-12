@@ -1,8 +1,9 @@
 import React from "react";
 import { ArrowLeft } from "lucide-react";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import defaultImg from "../assets/defaultUser.png"
+import { baseurl } from "../../address/address";
 
 function NavBarforChatPage() {
   const navigate = useNavigate();
@@ -13,6 +14,7 @@ function NavBarforChatPage() {
   function navigateToChatScreen() {
     navigate("/");
   }
+
   return (
     <div className="sticky z-10 top-0">
       <div className="p-2 flex items-center flex-row h-[8vh] md:h-[12vh] bg-indigo-400">
@@ -22,9 +24,9 @@ function NavBarforChatPage() {
         />
 
         <div className="relative">
-          <div className=" border-black h-11 w-11 rounded-full overflow-hidden border-2 cursor-pointer ml-2">
+          <Link to={`/profile/${id}`}><div className=" border-black h-11 w-11 rounded-full overflow-hidden border-2 cursor-pointer ml-2">
             <img src={logo ? logo : defaultImg} alt="Profile-photo" className="h-full w-full object-cover"/>
-          </div>
+          </div></Link>
           <div
             className={`${online?.includes(id) ? "bg-green-700" : ""} h-3 w-3 absolute rounded-full top-8 left-8 z-1`}
           ></div>
