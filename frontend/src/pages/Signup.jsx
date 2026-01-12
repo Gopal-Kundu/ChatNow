@@ -35,7 +35,7 @@ function Signup() {
       }
       navigate("/login");
     } catch (error) {
-      toast.error("Registration Failed. Please try again.", {
+      toast.error(error.response.data, {
         position: "top-center",
         duration: 1000,
       });
