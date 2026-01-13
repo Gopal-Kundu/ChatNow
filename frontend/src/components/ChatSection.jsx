@@ -13,7 +13,7 @@ function ChatSection({ theirId }) {
   const filteredMsgs = allMsgs.filter(
     (msg) =>
       (msg.receiverId === id && msg.senderId === user._id) ||
-      (msg.senderId === id && msg.receiverId === user._id)
+      (msg.senderId === id && msg.receiverId === user._id) 
   );
 
   return (
