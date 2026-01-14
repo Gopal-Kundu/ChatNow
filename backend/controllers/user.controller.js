@@ -80,7 +80,7 @@ export const uploadProfilePhoto = async (req, res) => {
     await user.save();
     return res.status(200).json({
       message: "Profile photo uploaded successfully",
-      user
+      user,
     });
   } catch (err) {
     console.error("Upload error:", err.message);

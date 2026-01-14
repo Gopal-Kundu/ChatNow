@@ -80,14 +80,14 @@ function Chats({ id, name, logo }) {
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setShowPopup(false)}
-                className="px-4 py-2 rounded-lg bg-white/10 text-white hover:bg-white/20 transition"
+                className="px-4 py-2 rounded-lg bg-white/10 text-white hover:bg-white/20 transition cursor-pointer"
               >
                 Cancel
               </button>
 
               <button
                 onClick={deleteChat}
-                className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-500 transition"
+                className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-500 cursor-pointer transition"
               >
                 Delete
               </button>

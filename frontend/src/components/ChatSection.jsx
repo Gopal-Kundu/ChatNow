@@ -5,9 +5,9 @@ import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 
 function ChatSection({ theirId }) {
-  const loading = useSelector((state) => state.auth.loading);
-  const user = useSelector((state) => state.auth.user);
-  const allMsgs = useSelector((state) => state.chat.msgContainer || []);
+  const loading = useSelector((state) => state.auth?.loading);
+  const user = useSelector((state) => state.auth?.user);
+  const allMsgs = useSelector((state) => state.chat?.msgContainer || []);
   const { id } = useParams();
 
   const filteredMsgs = allMsgs.filter(
@@ -22,11 +22,11 @@ function ChatSection({ theirId }) {
         <LoadingPage />
       ) : (
         <div>
-          {filteredMsgs.map((msg, idx) => (
+          {filteredMsgs?.map((msg, idx) => (
             <Message
               key={idx}
               user={theirId === msg?.senderId ? "false" : "true"}
-              text={msg.message}
+              text={msg?.message}
             />
           ))}
         </div>

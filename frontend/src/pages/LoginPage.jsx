@@ -53,9 +53,8 @@ function LoginPage() {
   };
 
   return (
-    // Background Image
     <div className='h-screen bg-[url("https://png.pngtree.com/background/20250104/original/pngtree-free-hd-wallpaper-4k-new-background-picture-image_15546678.jpg")] bg-cover bg-center'>
-      {/* Navbar */}
+  
       <div className="inter py-4 flex justify-center items-center gap-4">
         <Link to="/">
           <div className="bg-white/50 p-2 px-5 cursor-pointer inline-block  rounded-3xl hover:bg-white/90 transition-colors duration-400">
@@ -68,7 +67,6 @@ function LoginPage() {
       </div>
 
     <div className="fade-in-bottom">
-      {/* Have a account div  */}
       <div className="mt-2 flex text-white justify-center items-center gap-1">
         <div className="montserrat">Have no account?</div>
         <span className="underline cursor-pointer hover:text-blue-950">
@@ -76,14 +74,12 @@ function LoginPage() {
         </span>
       </div>
 
-      {/* big signup div */}
       <div className="flex justify-center items-center mt-6">
         <div className="inter inline-block text-3xl font-bold text-white">
           Login
         </div>
       </div>
 
-      {/* form  */}
       <div className="mt-6 flex justify-center items-center">
         <form
           className="flex flex-col justify-center items-center gap-5"

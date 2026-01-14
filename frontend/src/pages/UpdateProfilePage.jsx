@@ -5,9 +5,9 @@ import ProfileForm from "../components/ProfileForm";
 import { useParams } from "react-router-dom";
 
 function UpdateProfilePage() {
-  const currentUser = useSelector((store) => store.auth.user);
-  const chats = useSelector((store) => store.chat.chats);
-  const onlineUsers = useSelector((store) => store.socket.onlineUsers);
+  const currentUser = useSelector((store) => store?.auth?.user);
+  const chats = useSelector((store) => store?.chat?.chats);
+  const onlineUsers = useSelector((store) => store?.socket?.onlineUsers);
 
   const [showEdit, setShowEdit] = useState(false);
   const [chatUser, setChatUser] = useState(null);
@@ -18,7 +18,7 @@ function UpdateProfilePage() {
   useEffect(() => {
     if (!id) return;
 
-    const userFromChats = chats?.find((u) => u._id === id);
+    const userFromChats = chats?.find((u) => u?._id === id);
 
     if (userFromChats) {
       setChatUser(userFromChats);
@@ -29,7 +29,7 @@ function UpdateProfilePage() {
     }
   }, [id, chats, currentUser]);
 
-  const isOnline = onlineUsers.includes(id);
+  const isOnline = onlineUsers?.includes(id);
 
   return (
     <div className="min-h-screen w-full bg-[#121212] flex justify-center items-start pt-12 font-inter text-white px-4">

@@ -4,13 +4,14 @@ import logo from "../assets/defaultUser.png";
 import axios from "axios";
 import { baseurl } from "../../address/address";
 import { setUser } from "../../redux/authSlice";
+import LoadingPage from "../pages/LoadingPage";
 
 function ProfileForm({ open, setOpen }) {
   const user = useSelector((state) => state.auth.user);
   const dispatch = useDispatch();
-
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    name: user?.username || "",
+    username: user?.username || "",
     about: user?.about || "",
   });
   const [photo, setPhoto] = useState(user?.profilePhoto || logo);
@@ -31,6 +32,7 @@ function ProfileForm({ open, setOpen }) {
     }
 
     try {
+      setLoading(true);
       const res1 = await axios.post(`${baseurl}/update`, formData, {
         headers: { "Content-Type": "application/json" },
         withCredentials: true,
@@ -53,9 +55,13 @@ function ProfileForm({ open, setOpen }) {
       setOpen(false);
     } catch (error) {
       console.error(error);
+    }finally{
+      setLoading(false);
     }
   };
 
+
+  if(loading) return <LoadingPage/>
   return (
     open && (
       <div className="fixed inset-0 z-50 flex justify-center items-center bg-black/70 backdrop-blur-sm px-4">
@@ -88,20 +94,18 @@ function ProfileForm({ open, setOpen }) {
             </p>
           </div>
 
-          {/* Name */}
           <div>
             <label className="block mb-1 font-medium">Name</label>
             <input
               type="text"
-              name="name"
-              value={formData.name}
+              name="username"
+              value={formData.username}
               onChange={handleChange}
               className="w-full p-2 rounded bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Enter your name"
             />
           </div>
 
-          {/* About */}
           <div>
             <label className="block mb-1 font-medium">About</label>
             <textarea
@@ -114,7 +118,6 @@ function ProfileForm({ open, setOpen }) {
             ></textarea>
           </div>
 
-          {/* Buttons */}
           <div className="flex gap-3">
             <button
               type="submit"
