@@ -12,6 +12,7 @@ import { setUser } from "../redux/authSlice";
 import { setAllMsgs, setChats, setMsg, setNewChat } from "../redux/chatSlice";
 import { RightSideBar } from "./components/RightSideBar";
 import LoadingPage from "./pages/LoadingPage";
+import CreateGroup from "./pages/CreateGroup";
 
 export let socket;
 

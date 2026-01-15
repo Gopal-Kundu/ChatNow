@@ -4,7 +4,10 @@ import Chats from "./Chats";
 import { useDispatch, useSelector } from "react-redux";
 import defaultImg from "../assets/defaultUser.png";
 import { Link, useNavigate } from "react-router-dom";
+import { Users } from "lucide-react";
 import axios from "axios";
+import CreateGroup from "../pages/CreateGroup";
+
 import {
   setAllMsgs,
   setChats,
@@ -15,7 +18,6 @@ import { setUser } from "../../redux/authSlice";
 import { baseurl } from "../../address/address";
 import { toast } from "sonner";
 import Footer from "./Footer";
-import { socket } from "../App";
 
 function LeftSideBar() {
   const dispatch = useDispatch();
@@ -25,6 +27,8 @@ function LeftSideBar() {
   const user = useSelector((state) => state.auth.user);
 
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [showCreateGroup, setShowCreateGroup] = useState(false);
+
 
   const logo = user?.profilePhoto || defaultImg;
 
@@ -78,9 +82,15 @@ function LeftSideBar() {
     }
   }
 
+  function handleCreateGroup() {
+    setShowCreateGroup(true);
+  }
+
+
 
   return (
     <div className="flex flex-col h-screen border-r border-white/20 bg-transparent">
+
       <div className="flex items-center gap-3 p-4 border-b border-white/20">
         <Link to={`profile/${user._id}`}>
           <div className="h-12 w-12 rounded-full overflow-hidden border-2 border-white cursor-pointer hover:scale-105 transition">
@@ -107,6 +117,11 @@ function LeftSideBar() {
           className="text-white w-6 h-6 cursor-pointer hover:text-blue-400"
         />
 
+        <Users
+          onClick={handleCreateGroup}
+          className="text-white w-6 h-6 cursor-pointer hover:text-green-400"
+        />
+
         <button
           onClick={handleLogout}
           className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/20 hover:bg-red-500/80 text-white transition"
@@ -126,6 +141,10 @@ function LeftSideBar() {
           />
         ))}
       </div>
+      {showCreateGroup && (
+        <CreateGroup onClose={() => setShowCreateGroup(false)} />
+      )}
+
       <Footer />
     </div>
   );
