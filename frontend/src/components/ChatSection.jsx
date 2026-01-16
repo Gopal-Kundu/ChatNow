@@ -10,7 +10,7 @@ function ChatSection({ theirId }) {
   const allMsgs = useSelector((state) => state.chat?.msgContainer || []);
   const { id } = useParams();
 
-  const bottomRef = useRef(null);
+  const containerRef = useRef(null);
 
   const filteredMsgs = allMsgs.filter(
     (msg) =>
@@ -19,7 +19,12 @@ function ChatSection({ theirId }) {
   );
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (containerRef.current) {
+      containerRef.current.scrollTo({
+        top: containerRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+    }
   }, [filteredMsgs.length]);
 
   return (
@@ -28,15 +33,14 @@ function ChatSection({ theirId }) {
         <LoadingPage />
       ) : (
         <div>
-          {filteredMsgs.map((msg, idx) => (
+          {filteredMsgs?.map((msg, idx) => (
             <Message
               key={idx}
               user={theirId === msg?.senderId ? "false" : "true"}
               text={msg?.message}
             />
           ))}
-
-          <div ref={bottomRef} />
+          <div ref={containerRef}  />
         </div>
       )}
     </div>
