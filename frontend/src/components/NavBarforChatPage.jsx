@@ -16,7 +16,7 @@ function NavBarforChatPage() {
   }
 
   return (
-    <div className="sticky z-10 top-0">
+    <div className="sticky z-[10] top-0">
       <div className="p-2 flex items-center flex-row h-[8vh] md:h-[12vh] bg-indigo-400">
         <ArrowLeft
           className="text-white size-8"
@@ -34,7 +34,7 @@ function NavBarforChatPage() {
 
         <div className="flex-1">
           <div className="overflow-hidden cursor-pointer h-7  ml-4 text-white text-md font-bold inter text-xl">
-            {chat?.find((arr)=>arr._id===id)?.username}
+            {chat?.find((arr)=>arr._id===id)?.username || "User"}
           </div>
         </div>
       </div>
