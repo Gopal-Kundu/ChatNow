@@ -20,13 +20,17 @@ function ChatSection({ theirId }) {
 
   useEffect(() => {
     if (containerRef.current) {
-      containerRef.current.scrollTop = containerRef.current.scrollHeight;
+      containerRef.current.scrollTo({
+        top: containerRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+
     }
-  }, [filteredMsgs.length]); 
+  }, [filteredMsgs.length]);
 
   return (
     <div
-      ref={containerRef} 
+      ref={containerRef}
       className="webkit-scrollbar flex-1 overflow-y-auto"
     >
       {loading ? (
@@ -34,7 +38,7 @@ function ChatSection({ theirId }) {
       ) : (
         filteredMsgs.map((msg) => (
           <Message
-            key={msg._id || msg.senderId + msg.message}
+            key={msg._id}
             user={theirId === msg?.senderId ? "false" : "true"}
             text={msg?.message}
           />
