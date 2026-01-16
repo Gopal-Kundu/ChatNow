@@ -20,28 +20,25 @@ function ChatSection({ theirId }) {
 
   useEffect(() => {
     if (containerRef.current) {
-      containerRef.current.scrollTo({
-        top: containerRef.current.scrollHeight,
-        behavior: "smooth",
-      });
+      containerRef.current.scrollTop = containerRef.current.scrollHeight;
     }
-  }, [filteredMsgs.length]);
+  }, [filteredMsgs.length]); 
 
   return (
-    <div className="webkit-scrollbar flex-1 overflow-y-auto">
+    <div
+      ref={containerRef} 
+      className="webkit-scrollbar flex-1 overflow-y-auto"
+    >
       {loading ? (
         <LoadingPage />
       ) : (
-        <div>
-          {filteredMsgs?.map((msg, idx) => (
-            <Message
-              key={idx}
-              user={theirId === msg?.senderId ? "false" : "true"}
-              text={msg?.message}
-            />
-          ))}
-          <div ref={containerRef}  />
-        </div>
+        filteredMsgs.map((msg) => (
+          <Message
+            key={msg._id || msg.senderId + msg.message}
+            user={theirId === msg?.senderId ? "false" : "true"}
+            text={msg?.message}
+          />
+        ))
       )}
     </div>
   );
