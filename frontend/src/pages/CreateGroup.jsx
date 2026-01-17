@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import axios from "axios";
 import { baseurl } from "../../address/address";
 import { useDispatch, useSelector } from "react-redux";
@@ -10,13 +10,12 @@ import { setNewChat } from "../../redux/chatSlice";
 function CreateGroup({ onClose }) {
   const dispatch = useDispatch();
 
-  const currentUser = useSelector((state) => state.auth.user);
   const allContacts = useSelector((state) => state.chat.chats);
 
   const [groupName, setGroupName] = useState("");
-  const [users, setUsers] = useState(allContacts || []);
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [logoFile, setLogoFile] = useState(null);
 
   function toggleUser(userId) {
     setSelectedUsers((prev) =>
@@ -24,6 +23,12 @@ function CreateGroup({ onClose }) {
         ? prev.filter((id) => id !== userId)
         : [...prev, userId]
     );
+  }
+
+  function handleLogoChange(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    setLogoFile(file);
   }
 
   async function handleCreateGroup() {
@@ -40,22 +45,26 @@ function CreateGroup({ onClose }) {
     try {
       setLoading(true);
 
+      const formData = new FormData();
+      formData.append("groupName", groupName);
+      formData.append("members", JSON.stringify(selectedUsers));
+
+      if (logoFile) {
+        formData.append("logo", logoFile);
+      }
+
       const res = await axios.post(
         `${baseurl}/group/create`,
-        {
-          groupName,
-          members: selectedUsers,
-        },
+        formData,
         {
           withCredentials: true,
-          headers: { "Content-Type": "application/json" },
         }
       );
 
       if (res?.data?.success) {
         dispatch(setNewChat(res.data.group));
         toast.success("Group created successfully");
-        onClose(); 
+        onClose();
       }
     } catch (error) {
       toast.error(error.response?.data?.message || "Group creation failed");
@@ -78,10 +87,27 @@ function CreateGroup({ onClose }) {
 
           <button
             onClick={onClose}
-            className="cursor-pointer text-white hover:text-red-400 text-lg"
+            className="text-white hover:text-red-400 text-lg"
           >
             ✕
           </button>
+        </div>
+
+        <div className="flex justify-center mb-4">
+          <label htmlFor="groupLogoInput" className="cursor-pointer">
+            <img
+              src={defaultImg}
+              alt="Group Logo"
+              className="w-24 h-24 rounded-full object-cover border border-white/40 hover:border-blue-400 transition"
+            />
+          </label>
+          <input
+            id="groupLogoInput"
+            type="file"
+            accept="image/*"
+            onChange={handleLogoChange}
+            className="hidden"
+          />
         </div>
 
         <input
@@ -93,42 +119,46 @@ function CreateGroup({ onClose }) {
         />
 
         <div className="max-h-64 overflow-y-auto space-y-2 mb-4">
-          {users ? users?.map((user) => {
-            const isSelected = selectedUsers.includes(user._id);
+          {allContacts?.length ? (
+            allContacts.map((user) => {
+              const isSelected = selectedUsers.includes(user._id);
 
-            return (
-              <div
-                key={user._id}
-                onClick={() => toggleUser(user._id)}
-                className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition
-                  ${
-                    isSelected
-                      ? "bg-blue-500/30 border border-blue-400"
-                      : "bg-white/10 hover:bg-white/20"
-                  }`}
-              >
-                <img
-                  src={user.profilePhoto || defaultImg}
-                  alt={user.username}
-                  className="w-10 h-10 rounded-full object-cover"
-                />
+              return (
+                <div
+                  key={user._id}
+                  onClick={() => toggleUser(user._id)}
+                  className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition
+                    ${
+                      isSelected
+                        ? "bg-blue-500/30 border border-blue-400"
+                        : "bg-white/10 hover:bg-white/20"
+                    }`}
+                >
+                  <img
+                    src={user.profilePhoto || defaultImg}
+                    alt={user.username}
+                    className="w-10 h-10 rounded-full object-cover"
+                  />
 
-                <span className="flex-1 text-white">
-                  {user.username}
-                </span>
+                  <span className="flex-1 text-white">
+                    {user.username}
+                  </span>
 
-                {isSelected && (
-                  <CheckCircle className="text-blue-400 w-5 h-5" />
-                )}
-              </div>
-            );
-          }): <h1 align="center" className="text-white ">No Users Found</h1>}
+                  {isSelected && (
+                    <CheckCircle className="text-blue-400 w-5 h-5" />
+                  )}
+                </div>
+              );
+            })
+          ) : (
+            <h1 className="text-center text-white">No Users Found</h1>
+          )}
         </div>
 
         <button
           onClick={handleCreateGroup}
           disabled={loading}
-          className="cursor-pointer w-full py-2 rounded-xl bg-blue-500 hover:bg-blue-600 text-white font-medium transition disabled:opacity-50"
+          className="w-full py-2 rounded-xl bg-blue-500 hover:bg-blue-600 text-white font-medium transition disabled:opacity-50"
         >
           {loading ? "Creating..." : "Create Group"}
         </button>

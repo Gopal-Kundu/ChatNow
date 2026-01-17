@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import { connectDB } from "./configs/database.js";
 import routes from "./routes/user.route.js";
+import groupRouter from "./routes/group.route.js"
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import http from "http";
@@ -22,6 +23,7 @@ app.use(
 app.use(express.json());
 app.use(cookieParser());
 app.use("/", routes);
+app.use("/",groupRouter);
 
 //SOCKET.IO
 const server = http.createServer(app);
