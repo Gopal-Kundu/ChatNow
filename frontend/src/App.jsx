@@ -13,6 +13,7 @@ import { setAllMsgs, setChats, setMsg, setNewChat } from "../redux/chatSlice";
 import { RightSideBar } from "./components/RightSideBar";
 import LoadingPage from "./pages/LoadingPage";
 import CreateGroup from "./pages/CreateGroup";
+import GroupChats from "./components/GroupChats";
 
 export let socket;
 
@@ -89,6 +90,7 @@ const App = () => {
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/chat/:id" element={<RightSideBar />} />
+        <Route path="group-chat/:id" element={<GroupChats/>}/>
         <Route path="/profile" element={<UpdateProfilePage />} />
         <Route path="/profile/:id" element={<UpdateProfilePage />} />
       </Routes>

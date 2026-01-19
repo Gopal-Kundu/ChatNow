@@ -41,6 +41,7 @@ function ChatSection({ theirId }) {
             key={msg._id}
             user={theirId === msg?.senderId ? "false" : "true"}
             text={msg?.message}
+            createdAt = {msg?.createdAt}
           />
         ))
       )}

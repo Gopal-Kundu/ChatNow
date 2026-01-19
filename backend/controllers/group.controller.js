@@ -4,8 +4,11 @@ import { User } from "../models/user.model.js";
 
 export const createGroup = async (req, res) => {
   try {
-    const { groupName, members } = req.body;
-    let {logo} = req.file;
+    let { groupName, members } = req.body;
+    let logo;
+    if(req.file){
+        logo = req.file;
+    }
     const adminId = req.id;
 
     if (!groupName) {
@@ -25,10 +28,19 @@ export const createGroup = async (req, res) => {
     });
 
     await User.findByIdAndUpdate(adminId, {
-        $$addToSet: {
+        $addToSet: {
             joinedGroups: newGroup._id,
         }
     });
+
+    await User.updateMany(
+      { _id: { $in: members } },
+      {
+        $addToSet: {
+          joinedGroups: newGroup._id,
+        },
+      }
+    );
 
     return res.status(201).json({
       success: true,

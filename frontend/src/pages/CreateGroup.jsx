@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { baseurl } from "../../address/address";
 import { useDispatch, useSelector } from "react-redux";
@@ -9,13 +9,14 @@ import { setNewChat } from "../../redux/chatSlice";
 
 function CreateGroup({ onClose }) {
   const dispatch = useDispatch();
-
   const allContacts = useSelector((state) => state.chat.chats);
 
   const [groupName, setGroupName] = useState("");
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [loading, setLoading] = useState(false);
+
   const [logoFile, setLogoFile] = useState(null);
+  const [logoPreview, setLogoPreview] = useState(null);
 
   function toggleUser(userId) {
     setSelectedUsers((prev) =>
@@ -28,8 +29,18 @@ function CreateGroup({ onClose }) {
   function handleLogoChange(e) {
     const file = e.target.files[0];
     if (!file) return;
+
     setLogoFile(file);
+    setLogoPreview(URL.createObjectURL(file));
   }
+
+  useEffect(() => {
+    return () => {
+      if (logoPreview) {
+        URL.revokeObjectURL(logoPreview);
+      }
+    };
+  }, [logoPreview]);
 
   async function handleCreateGroup() {
     if (!groupName.trim()) {
@@ -47,7 +58,7 @@ function CreateGroup({ onClose }) {
 
       const formData = new FormData();
       formData.append("groupName", groupName);
-      formData.append("members", JSON.stringify(selectedUsers));
+      formData.append("members", selectedUsers); 
 
       if (logoFile) {
         formData.append("logo", logoFile);
@@ -56,9 +67,7 @@ function CreateGroup({ onClose }) {
       const res = await axios.post(
         `${baseurl}/group/create`,
         formData,
-        {
-          withCredentials: true,
-        }
+        { withCredentials: true }
       );
 
       if (res?.data?.success) {
@@ -76,7 +85,7 @@ function CreateGroup({ onClose }) {
   return (
     <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
       <div className="w-full max-w-md bg-transparent border border-white/20 rounded-2xl p-6 backdrop-blur-xl">
-        
+
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <Users className="text-white" />
@@ -96,7 +105,7 @@ function CreateGroup({ onClose }) {
         <div className="flex justify-center mb-4">
           <label htmlFor="groupLogoInput" className="cursor-pointer">
             <img
-              src={defaultImg}
+              src={logoPreview || defaultImg}
               alt="Group Logo"
               className="w-24 h-24 rounded-full object-cover border border-white/40 hover:border-blue-400 transition"
             />

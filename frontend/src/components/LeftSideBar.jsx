@@ -18,6 +18,7 @@ import { setUser } from "../../redux/authSlice";
 import { baseurl } from "../../address/address";
 import { toast } from "sonner";
 import Footer from "./Footer";
+import GroupChats from "./GroupChats";
 
 function LeftSideBar() {
   const dispatch = useDispatch();
@@ -25,7 +26,7 @@ function LeftSideBar() {
 
   const chat = useSelector((state) => state.chat.chats) || [];
   const user = useSelector((state) => state.auth.user);
-
+  const group = useSelector((state)=> state.chat.groups) || [];
   const [phoneNumber, setPhoneNumber] = useState("");
   const [showCreateGroup, setShowCreateGroup] = useState(false);
 
@@ -138,6 +139,14 @@ function LeftSideBar() {
             id={perChat._id}
             name={perChat.username}
             logo={perChat.profilePhoto}
+          />
+        ))}
+        {group?.map((perGroup) => (
+          <GroupChats
+            key={perGroup._id}
+            id={perGroup._id}
+            groupName={perGroup.groupName}
+            logo={perGroup.logo}
           />
         ))}
       </div>
