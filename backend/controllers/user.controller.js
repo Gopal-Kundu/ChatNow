@@ -147,6 +147,28 @@ export const login = async (req, res) => {
       }
     }
 
+
+    let allGroups = [];
+    let allGroupMessages = [];
+    if (user.joinedGroups) {
+      await user.populate({
+        path: "joinedGroups",
+        populate: {
+          path: "messages.senderId",
+          select: "_id username profilePhoto about"
+        }
+      })
+      allGroups = user.joinedGroups.map((eachGroup) => ({
+        groupName: eachGroup.groupName,
+        logo: eachGroup.logo
+      }));
+
+      allGroupMessages = user.joinedGroups.map((eachGroup) => ({
+        groupId: eachGroup._id,
+        messages: eachGroup.messages,
+      }))
+    }
+
     return res
       .status(200)
       .cookie("token", token, {
@@ -160,6 +182,8 @@ export const login = async (req, res) => {
         user: safeUser,
         allMessages,
         participants,
+        allGroups,
+        allGroupMessages
       });
 
   } catch (error) {
@@ -201,7 +225,7 @@ export const remember = async (req, res) => {
     }
 
     const user = await User.findById(userId).select(
-      "_id username profilePhoto about connectedUsers"
+      "-password"
     );
 
     if (!user) {
@@ -228,11 +252,36 @@ export const remember = async (req, res) => {
       }
     }
 
+
+    let allGroups = [];
+    let allGroupMessages = [];
+    if (user.joinedGroups) {
+      await user.populate({
+        path: "joinedGroups",
+        populate: {
+          path: "messages.senderId",
+          select: "_id username profilePhoto about"
+        }
+      })
+      allGroups = user.joinedGroups.map((eachGroup) => ({
+        groupName: eachGroup.groupName,
+        logo: eachGroup.logo
+      }));
+
+      allGroupMessages = user.joinedGroups.map((eachGroup) => ({
+        groupId: eachGroup._id,
+        messages: eachGroup.messages
+      }))
+    }
+
+
     return res.status(200).json({
       success: true,
       user,
       allMessages,
       participants,
+      allGroups,
+      allGroupMessages
     });
 
   } catch (err) {

@@ -46,10 +46,10 @@ function GroupChats({ id, groupName, logo }) {
 
         <div onClick={openGroupChat} className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <Users size={20} className="text-blue-400" />
             <p className="text-white font-semibold text-xl truncate">
               {groupName}
             </p>
+            <Users size={20} className="text-blue-400" />
           </div>
         </div>
 

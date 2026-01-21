@@ -9,7 +9,7 @@ import { setOnlineUsers } from "../redux/socketSlice";
 import UpdateProfilePage from "./pages/UpdateProfilePage";
 import axios from "axios";
 import { setUser } from "../redux/authSlice";
-import { setAllMsgs, setChats, setMsg, setNewChat } from "../redux/chatSlice";
+import { setAllMsgs, setChats, setGroupAllMsgs, setGroups, setMsg, setNewChat } from "../redux/chatSlice";
 import { RightSideBar } from "./components/RightSideBar";
 import LoadingPage from "./pages/LoadingPage";
 import CreateGroup from "./pages/CreateGroup";
@@ -36,6 +36,8 @@ const App = () => {
           dispatch(setUser(res.data.user));
           dispatch(setAllMsgs(res.data.allMessages));
           dispatch(setChats(res.data.participants));
+          dispatch(setGroups(res.data.allGroups));
+          dispatch(setGroupAllMsgs(res.data.allGroupMessages));
         }
       } catch (err) {
         console.error("No active session");
