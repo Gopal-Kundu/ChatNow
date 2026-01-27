@@ -2,44 +2,42 @@ import { Conversation } from "../models/conversation.model.js";
 import { Message } from "../models/message.model.js";
 import { User } from "../models/user.model.js";
 import dotenv from "dotenv";
-import { io, onlineUsers } from "../server.js";
-
+import { io, onlineUsers, activeChats } from "../server.js";
 
 dotenv.config({ quiet: true });
 
+function getSocketId(userId) {
+  return onlineUsers[userId];
+}
 
 export const getAllChats = async (req, res) => {
   try {
-    const userId = req.id;
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(400).json({
-        message: "No User found",
-        success: false,
-      });
-    }
-    const allUsers = await Conversation.findById(user.connectedUsers);
-    if (!allUsers) {
-      return res.status(400).json({
-        message: "No Chats Found",
-        success: false,
+    const user = await User.findById(req.id);
+    if (!user || !user.connectedUsers) {
+      return res.status(200).json({
+        success: true,
+        allUsers: [],
       });
     }
 
-    await allUsers.populate({
-      path: "participants",
-      select: "profilePhoto username",
-    });
+    const conversation = await Conversation.findById(user.connectedUsers)
+      .populate("participants.user", "username profilePhoto");
+
+    if (!conversation) {
+      return res.status(200).json({
+        success: true,
+        allUsers: [],
+      });
+    }
 
     return res.status(200).json({
-      message: "All User found Successfully",
-      allUsers,
       success: true,
+      allUsers: conversation.participants,
     });
-  } catch (error) {
-    return res.status(401).json({
-      message: "Server error",
+  } catch {
+    return res.status(500).json({
       success: false,
+      message: "Server error",
     });
   }
 };
@@ -49,71 +47,60 @@ export const addUser = async (req, res) => {
     const userId = req.id;
     const { phoneNumber } = req.body;
 
-    if (!userId || !phoneNumber) {
+    if (!phoneNumber) {
       return res.status(400).json({
-        message: "Something missing",
         success: false,
+        message: "Phone number required",
       });
     }
-
-
 
     const newUser = await User.findOne({ phoneNumber });
-    if (!newUser) {
-      return res.status(400).json({
-        message: "No User Found",
-        success: false,
-      });
-    }
-
-    const newUserId = newUser._id;
-
-    if (newUserId.equals(userId)) {
+    if (!newUser || newUser._id.equals(userId)) {
       return res.status(400).json({
         success: false,
-        message: "You cannot add yourself",
+        message: "Invalid user",
       });
     }
 
     const user = await User.findById(userId);
     let conversation = await Conversation.findById(user.connectedUsers);
+
     if (!conversation) {
       conversation = await Conversation.create({
-        participants: [newUserId],
+        participants: [{ user: newUser._id, newMsgCount: 0 }],
         allMessages: [],
       });
       user.connectedUsers = conversation._id;
       await user.save();
     } else {
-      const exists = await Conversation.findOne({
-        _id: user.connectedUsers,
-        participants: newUserId,
-      });
-      if (exists)
-        return res.status(400).json({
-          message: "User already exists at chatlist.",
+      const exists = conversation.participants.some(
+        p => p.user.toString() === newUser._id.toString()
+      );
+      if (exists) {
+        return res.status(200).json({
           success: true,
+          message: "User already added",
         });
-      else conversation.participants.push(newUserId);
+      }
+      conversation.participants.push({
+        user: newUser._id,
+        newMsgCount: 0,
+      });
+      await conversation.save();
     }
 
-
-    await conversation.save();
-
     return res.status(200).json({
-      message: "New user added successfully",
+      success: true,
       newUser: {
         _id: newUser._id,
-        profilePhoto: newUser.profilePhoto,
         username: newUser.username,
+        profilePhoto: newUser.profilePhoto,
       },
-      success: true,
     });
-
-  } catch (error) {
+  } catch {
     return res.status(500).json({
-      message: "Server error",
       success: false,
+      message: "Server error",
     });
   }
 };
@@ -123,134 +110,112 @@ export const sendMessage = async (req, res) => {
     const senderId = req.id;
     const receiverId = req.params.id;
     const { message } = req.body;
-    if (!senderId || !receiverId || !message || senderId == receiverId) {
-      return res.status(400).json({
-        success: false,
-        message: "Something is missing",
-      });
+
+    if (!message || senderId === receiverId) {
+      return res.status(400).json({ success: false });
     }
-    const receiver = await User.findById(receiverId);
-    if (!receiver) {
-      return res.status(400).json({
-        success: false,
-        message: "Receiver not found",
-      });
-    }
+
     const newMessage = await Message.create({
       senderId,
       receiverId,
       message,
     });
 
-    let sender = await User.findById(senderId).select("-password");
-    let senderConversationId = sender.connectedUsers;
+    const sender = await User.findById(senderId).select("-password");
+    let senderConv = await Conversation.findById(sender.connectedUsers);
 
-    if (!senderConversationId) {
-      const newConversation = await Conversation.create({
-        participants: [receiverId],
-        allMessages: [newMessage._id]
-      })
-      sender.connectedUsers = newConversation._id;
-    } else {
-      await Conversation.findByIdAndUpdate(senderConversationId, {
-        $push: {
-          allMessages: newMessage._id
-        },
-        $addToSet: {
-          participants: receiverId,
-        }
-      })
+    if (!senderConv) {
+      senderConv = await Conversation.create({
+        participants: [{ user: receiverId, newMsgCount: 0 }],
+        allMessages: [],
+      });
+      sender.connectedUsers = senderConv._id;
     }
 
-    let receiverConversationId = receiver.connectedUsers;
-
-    if (!receiverConversationId) {
-      const newConversation = await Conversation.create({
-        participants: [senderId],
-        allMessages: [newMessage._id]
-      })
-      receiver.connectedUsers = newConversation._id;
-      io.to(getSocketId(receiverId)).emit("New_Chat", sender);
-    } else {
-      const receiverConversation = await Conversation.findById(receiverConversationId);
-      const isNewChat = !receiverConversation.participants.includes(senderId);
-
-      if (isNewChat) {
-        io.to(getSocketId(receiverId)).emit("New_Chat", sender);
-      }
-
-      await Conversation.findByIdAndUpdate(receiverConversationId, {
-        $push: {
-          allMessages: newMessage._id
-        },
-        $addToSet: {
-          participants: senderId,
-        }
-      })
-    }
-    await receiver.save();
+    senderConv.allMessages.push(newMessage._id);
+    await senderConv.save();
     await sender.save();
 
-    io.to(getSocketId(receiverId)).emit("Msg from sender", newMessage);
-    return res.status(200).json({
-      message: "Message sent successfully",
-      success: true,
-      newMessage,
-    });
-  } catch (error) {
-    return res.status(401).json({
-      message: "Server error",
-      success: false,
-    });
+    const receiver = await User.findById(receiverId);
+    let receiverConv = await Conversation.findById(receiver.connectedUsers);
+
+    const isChatOpen =
+      activeChats[receiverId]?.toString() === senderId.toString();
+
+    let receiverNewMsgCount = 0;
+
+    if (!receiverConv) {
+      receiverConv = await Conversation.create({
+        participants: [{ user: senderId, newMsgCount: isChatOpen ? 0 : 1 }],
+        allMessages: [newMessage._id],
+      });
+      receiver.connectedUsers = receiverConv._id;
+      io.to(getSocketId(receiverId)).emit("New_Chat", sender);
+    } else {
+      receiverConv.allMessages.push(newMessage._id);
+
+      const participant = receiverConv.participants.find(
+        (p) => p.user.toString() === senderId
+      );
+
+      if (participant) {
+        if (!isChatOpen) {
+          participant.newMsgCount += 1;
+          receiverNewMsgCount = participant.newMsgCount;
+        }
+      } else {
+        receiverConv.participants.push({
+          user: senderId,
+          newMsgCount: isChatOpen ? 0 : 1,
+        });
+        receiverNewMsgCount = isChatOpen ? 0 : 1;
+      }
+      io.to(getSocketId(receiverId)).emit("New_Chat", sender);
+    }
+
+    await receiverConv.save();
+    await receiver.save();
+
+    io.to(getSocketId(receiverId)).emit("Msg_from_sender", newMessage);
+
+    if (!isChatOpen) {
+      io.to(getSocketId(receiverId)).emit("New_Msg_Count", {
+        _id: senderId,
+        newMsgCount: receiverNewMsgCount,
+      });
+    }
+
+    return res.json({ success: true, newMessage });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false });
   }
 };
 
-function getSocketId(recieverId) {
-  return onlineUsers[recieverId];
-}
-
 export const getAllMessage = async (req, res) => {
   try {
-    const senderId = req.id;
-    const receiverId = req.params.id;
-
-    if (!senderId || !receiverId) {
-      return res.status(400).json({
-        success: false,
-        message: "Something is missing",
-      });
-    }
-
-    const sender = await User.findById(senderId);
+    const sender = await User.findById(req.id);
     if (!sender || !sender.connectedUsers) {
-      return res.status(400).json({
-        success: false,
-        message: "No conversation found",
+      return res.status(200).json({
+        success: true,
+        messages: [],
       });
     }
 
-    const conversation = await Conversation
-      .findById(sender.connectedUsers)
+    const conversation = await Conversation.findById(sender.connectedUsers)
       .populate("allMessages");
 
-    if (!conversation) {
-      return res.status(400).json({
-        success: false,
-        message: "No conversation found",
-      });
-    }
-
-    const messages = conversation.allMessages.filter(msg =>
-      (msg.senderId.equals(senderId) && msg.receiverId.equals(receiverId)) ||
-      (msg.senderId.equals(receiverId) && msg.receiverId.equals(senderId))
+    const messages = conversation.allMessages.filter(
+      msg =>
+        (msg.senderId.equals(req.id) && msg.receiverId.equals(req.params.id)) ||
+        (msg.senderId.equals(req.params.id) && msg.receiverId.equals(req.id))
     );
 
     return res.status(200).json({
       success: true,
       messages,
     });
-
-  } catch (error) {
+  } catch {
     return res.status(500).json({
       success: false,
       message: "Server error",
@@ -260,38 +225,87 @@ export const getAllMessage = async (req, res) => {
 
 export const deleteChat = async (req, res) => {
   try {
-    const userId = req.id;
-    const deleteUserId = req.params.id;
-
-    const user = await User.findById(userId);
-    const conversationId = user.connectedUsers;
+    const user = await User.findById(req.id);
+    if (!user || !user.connectedUsers) {
+      return res.status(400).json({
+        success: false,
+        message: "No conversation",
+      });
+    }
 
     const messages = await Message.find({
       $or: [
-        { senderId: userId, receiverId: deleteUserId },
-        { senderId: deleteUserId, receiverId: userId }
-      ]
+        { senderId: req.id, receiverId: req.params.id },
+        { senderId: req.params.id, receiverId: req.id },
+      ],
     }).select("_id");
 
-    const messageIds = messages.map(m => m._id);
-
-    await Conversation.findByIdAndUpdate(conversationId, {
+    await Conversation.findByIdAndUpdate(user.connectedUsers, {
       $pull: {
-        participants: deleteUserId,
-        allMessages: { $in: messageIds }
-      }
+        participants: { user: req.params.id },
+        allMessages: { $in: messages.map(m => m._id) },
+      },
     });
 
     return res.status(200).json({
       success: true,
-      message: "Deleted user",
-      deleteUserId,
+      deleteUserId: req.params.id,
     });
-
-  } catch (err) {
-    return res.status(400).json({
+  } catch {
+    return res.status(500).json({
       success: false,
-      message: "Failed to delete",
+      message: "Delete failed",
     });
   }
 };
+
+export const setMsgCountZero = async (req, res) => {
+  try {
+    const userId = req.id;
+    const targetId = req.params.id;
+
+    const user = await User.findById(userId);
+    if (!user || !user.connectedUsers) {
+      return res.status(400).json({
+        success: false,
+        message: "No conversation found",
+      });
+    }
+
+    const conversation = await Conversation.findById(user.connectedUsers);
+    if (!conversation) {
+      return res.status(400).json({
+        success: false,
+        message: "Conversation not found",
+      });
+    }
+
+    const participant = conversation.participants.find(
+      (p) => p.user.toString() === targetId
+    );
+
+    if (!participant) {
+      return res.status(404).json({
+        success: false,
+        message: "Participant not found",
+      });
+    }
+
+    participant.newMsgCount = 0;
+    await conversation.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Message count reset to 0",
+      userId: targetId,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
+
+
+

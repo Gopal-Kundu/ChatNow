@@ -4,6 +4,7 @@ import {
   getAllChats,
   getAllMessage,
   sendMessage,
+  setMsgCountZero,
 } from "../controllers/message.controller.js";
 import {
   login,
@@ -34,6 +35,7 @@ router.post(
   uploadProfilePhoto
 );
 router.get("/deleteChat/:id",isAuthenticated, deleteChat);
+router.get("/setmsgcount/:id",isAuthenticated, setMsgCountZero);
 
 
 export default router;

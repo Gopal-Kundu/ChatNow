@@ -23,7 +23,6 @@ function InputBox({ theirId }) {
 
     const messageToSend = msg;
     currMsg("");
-
     try {
       const res = await axios.post(
         `${baseurl}/sendmsg/${theirId}`,
@@ -38,7 +37,7 @@ function InputBox({ theirId }) {
         dispatch(setMsg(res.data.newMessage));
       }
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   }
 

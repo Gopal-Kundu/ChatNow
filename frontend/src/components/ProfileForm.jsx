@@ -3,13 +3,12 @@ import { useDispatch, useSelector } from "react-redux";
 import logo from "../assets/defaultUser.png";
 import axios from "axios";
 import { baseurl } from "../../address/address";
-import { setUser } from "../../redux/authSlice";
+import { setLoading, setUser } from "../../redux/authSlice";
 import LoadingPage from "../pages/LoadingPage";
 
 function ProfileForm({ open, setOpen }) {
   const user = useSelector((state) => state.auth.user);
   const dispatch = useDispatch();
-  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     username: user?.username || "",
     about: user?.about || "",
@@ -23,45 +22,45 @@ function ProfileForm({ open, setOpen }) {
     });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setOpen(false);
-    const image = new FormData();
-    if (photo && photo !== logo) {
-      image.append("profilePhoto", photo);
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  const image = new FormData();
+  if (photo && photo !== logo) {
+    image.append("profilePhoto", photo);
+  }
+
+  try {
+    dispatch(setLoading(true));
+
+    const res1 = await axios.post(`${baseurl}/update`, formData, {
+      headers: { "Content-Type": "application/json" },
+      withCredentials: true,
+    });
+
+    if (res1.data.success) {
+      dispatch(setUser(res1.data.updatedUser));
     }
 
-    try {
-      setLoading(true);
-      const res1 = await axios.post(`${baseurl}/update`, formData, {
-        headers: { "Content-Type": "application/json" },
+    if (photo && photo !== logo) {
+      const res2 = await axios.post(`${baseurl}/update/photo`, image, {
         withCredentials: true,
       });
 
-      if (res1.data.success) {
-        dispatch(setUser(res1.data.updatedUser));
+      if (res2.data.success) {
+        dispatch(setUser(res2.data.user));
       }
-
-      if (photo && photo !== logo) {
-        const res2 = await axios.post(`${baseurl}/update/photo`, image, {
-          withCredentials: true,
-        });
-
-        if (res2.data.success) {
-          dispatch(setUser(res2.data.user));
-        }
-      }
-
-      setOpen(false);
-    } catch (error) {
-      console.error(error);
-    }finally{
-      setLoading(false);
     }
-  };
+
+    setOpen(false); 
+  } catch (error) {
+    console.error(error);
+  } finally {
+    dispatch(setLoading(false));
+  }
+};
 
 
-  if(loading) return <LoadingPage/>
   return (
     open && (
       <div className="fixed inset-0 z-50 flex justify-center items-center bg-black/70 backdrop-blur-sm px-4">

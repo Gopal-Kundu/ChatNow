@@ -5,7 +5,7 @@ const chatSlice = createSlice({
   initialState: {
     chats: [],
     msgContainer: [], //For Normal Chats
-    
+
     groups: [],
     groupMsgContainer: [] //For Group Chats
   },
@@ -20,19 +20,46 @@ const chatSlice = createSlice({
       state.msgContainer.push(action.payload);
     },
     setNewChat: (state, action) => {
+      const user = action.payload.user ?? action.payload;
+
       const exists = state.chats.find(
-        (u) => u._id === action.payload._id
+        (chat) => chat.user._id === user._id
       );
-      if (!exists) state.chats.push(action.payload);
+
+      if (!exists) {
+        state.chats.push({
+          user,
+          newMsgCount: 0,
+        });
+      }
     },
+
     deleteUser: (state, action) => {
       state.chats = state.chats.filter(
-        (chat) => chat._id !== action.payload
+        (chat) => chat.user._id !== action.payload
       );
 
       state.msgContainer = state.msgContainer.filter(
         msg => msg.senderId !== action.payload && msg.receiverId !== action.payload
       );
+    },
+    setNewMsgCount: (state, action) => {
+      const chat = state.chats.find(
+        (u) => u.user._id === action.payload._id
+      );
+      if (chat) {
+        chat.newMsgCount = action.payload.newMsgCount;
+      }
+
+    },
+    setNewMsgCountToZero: (state, action) => {
+      const chat = state.chats.find(
+        (u) => u.user._id === action.payload._id
+      );
+      if (chat) {
+        chat.newMsgCount = 0;
+      }
+
     },
 
 
@@ -56,5 +83,5 @@ const chatSlice = createSlice({
   }
 });
 
-export const { setChats, setMsg, setAllMsgs, setNewChat, deleteUser, setNewGroup, setGroupMsg, setGroupAllMsgs, setGroups } = chatSlice.actions;
+export const { setChats, setMsg, setAllMsgs, setNewChat, deleteUser, setNewGroup, setGroupMsg, setGroupAllMsgs, setGroups, setNewMsgCount, setNewMsgCountToZero } = chatSlice.actions;
 export default chatSlice.reducer;

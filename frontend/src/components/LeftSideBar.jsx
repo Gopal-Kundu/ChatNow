@@ -26,7 +26,7 @@ function LeftSideBar() {
 
   const chat = useSelector((state) => state.chat.chats) || [];
   const user = useSelector((state) => state.auth.user);
-  const group = useSelector((state)=> state.chat.groups) || [];
+  const group = useSelector((state) => state.chat.groups) || [];
   const [phoneNumber, setPhoneNumber] = useState("");
   const [showCreateGroup, setShowCreateGroup] = useState(false);
 
@@ -133,14 +133,16 @@ function LeftSideBar() {
       </div>
 
       <div className="flex-1 overflow-y-auto">
-        {chat?.map((perChat) => (
+        {chat.map((chat) => (
           <Chats
-            key={perChat._id}
-            id={perChat._id}
-            name={perChat.username}
-            logo={perChat.profilePhoto}
+            key={chat.user._id}
+            id={chat.user._id}
+            name={chat.user.username}
+            logo={chat.user.profilePhoto}
+            newMsgCount={chat.newMsgCount}
           />
         ))}
+
         {group?.map((perGroup) => (
           <GroupChats
             key={perGroup._id}

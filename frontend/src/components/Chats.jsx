@@ -6,8 +6,7 @@ import { Trash2 } from "lucide-react";
 import { deleteUser } from "../../redux/chatSlice";
 import axios from "axios";
 import { baseurl } from "../../address/address";
-function Chats({ id, name, logo }) {
-  
+function Chats({ id, name, logo, newMsgCount }) {
   const dispatch = useDispatch();
   const [showPopup, setShowPopup] = useState(false);
   const navigate = useNavigate();
@@ -22,7 +21,7 @@ function Chats({ id, name, logo }) {
         withCredentials: true,
       });
       setShowPopup(false);
-      if(res.data.success){
+      if (res.data.success) {
         dispatch(deleteUser(res.data.deleteUserId));
       }
     } catch (err) {
@@ -56,6 +55,16 @@ function Chats({ id, name, logo }) {
         <div onClick={openChat} className="flex-1 min-w-0">
           <p className="text-white font-semibold text-2xl truncate">{name}</p>
         </div>
+        {newMsgCount > 0 && (
+          <div
+            className="min-w-[22px] h-[22px] px-2
+               flex items-center justify-center
+               rounded-full bg-green-600
+               text-white text-xs font-bold"
+          >
+            {newMsgCount}
+          </div>
+        )}
         <button
           onClick={(e) => {
             setShowPopup(true);

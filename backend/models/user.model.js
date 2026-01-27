@@ -7,7 +7,6 @@ const userModel = new mongoose.Schema({
   profilePhoto: { type: String, default: "" },
   about: { type: String, default: "" },
   connectedUsers: {type: mongoose.Schema.Types.ObjectId, ref: "Conversation"},
-  joinedGroups: [{type: mongoose.Schema.Types.ObjectId, ref: "Group"}],
-});
-
+  joinedGroups: [{type: mongoose.Schema.Types.ObjectId, ref: "Group"}]
+})
 export const User = mongoose.model("User", userModel);

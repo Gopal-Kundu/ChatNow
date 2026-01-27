@@ -9,7 +9,7 @@ import { setOnlineUsers } from "../redux/socketSlice";
 import UpdateProfilePage from "./pages/UpdateProfilePage";
 import axios from "axios";
 import { setUser } from "../redux/authSlice";
-import { setAllMsgs, setChats, setGroupAllMsgs, setGroups, setMsg, setNewChat } from "../redux/chatSlice";
+import { setAllMsgs, setChats, setGroupAllMsgs, setGroups, setMsg, setNewChat, setNewMsgCount } from "../redux/chatSlice";
 import { RightSideBar } from "./components/RightSideBar";
 import LoadingPage from "./pages/LoadingPage";
 import CreateGroup from "./pages/CreateGroup";
@@ -75,13 +75,21 @@ const App = () => {
     dispatch(setMsg(newMessage));
   };
   const handleIncomingChat = (newChat) => {
-    dispatch(setNewChat(newChat));
+    const data = {
+      user: newChat
+    }
+    dispatch(setNewChat(data));
   }
+  const handleNewMsgCount = (data) => {
+    dispatch(setNewMsgCount(data));
+  }
+  socket.on("New_Msg_Count", handleNewMsgCount);
   socket.on("New_Chat", handleIncomingChat);
-  socket.on("Msg from sender", handleIncomingMessage);
+  socket.on("Msg_from_sender", handleIncomingMessage);
   return () => {
+    socket.off("New_Msg_Count", handleNewMsgCount);
     socket.off("New_Chat", handleIncomingChat);
-    socket.off("Msg from sender", handleIncomingMessage);
+    socket.off("Msg_from_sender", handleIncomingMessage);
   };
 }, [user]);
  

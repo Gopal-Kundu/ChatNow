@@ -2,15 +2,15 @@ import express from "express";
 import dotenv from "dotenv";
 import { connectDB } from "./configs/database.js";
 import routes from "./routes/user.route.js";
-import groupRouter from "./routes/group.route.js"
+import groupRouter from "./routes/group.route.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import http from "http";
 import { Server } from "socket.io";
+
 dotenv.config();
 
 const app = express();
-
 const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:5173";
 
 app.use(
@@ -23,45 +23,50 @@ app.use(
 app.use(express.json());
 app.use(cookieParser());
 app.use("/", routes);
-app.use("/",groupRouter);
+app.use("/", groupRouter);
 
-//SOCKET.IO
 const server = http.createServer(app);
+
 export const io = new Server(server, {
   cors: {
     origin: CLIENT_URL,
     credentials: true,
-  }
+  },
 });
 
 export let onlineUsers = {};
+export let activeChats = {};
 
 io.on("connection", (socket) => {
-  console.log("User is connected", socket.id);
-  socket.on("Connect me", (data) => {
-    console.log("Got the data", data);
-    if (data) {
-      onlineUsers[data] = socket.id;
-      console.log("Connected Users: ", Object.keys(onlineUsers));
-      io.emit("Connected users", Object.keys(onlineUsers));
+  console.log("User connected:", socket.id);
+
+  socket.on("Connect me", (userId) => {
+    socket.userId = userId;
+    onlineUsers[userId] = socket.id;
+    io.emit("Connected users", Object.keys(onlineUsers));
+  });
+
+  socket.on("ACTIVE_CHAT", (chatUserId) => {
+    if (socket.userId) {
+      activeChats[socket.userId] = chatUserId;
     }
   });
 
   socket.on("disconnect", () => {
-    console.log("User disconnected", socket.id);
     for (let [k, v] of Object.entries(onlineUsers)) {
-      if (onlineUsers[k] === socket.id) delete onlineUsers[k];
+      if (v === socket.id) delete onlineUsers[k];
     }
-    console.log("After disconnecting users online ", Object.keys(onlineUsers));
+    delete activeChats[socket.userId];
     io.emit("Disconnected users", Object.keys(onlineUsers));
   });
 });
 
 app.get("/", (req, res) => {
-  res.status(200).json({ message: "Server is running!" });
+  res.json({ message: "Server running" });
 });
+
 const port = process.env.PORT || 2005;
 server.listen(port, () => {
   connectDB();
-  console.log(`Server running on:\n http://localhost:${port}`);
+  console.log(`Server running on http://localhost:${port}`);
 });

@@ -137,7 +137,7 @@ export const login = async (req, res) => {
       )
         .populate("allMessages")
         .populate({
-          path: "participants",
+          path: "participants.user",
           select: "_id username profilePhoto about",
         });
 
@@ -242,7 +242,7 @@ export const remember = async (req, res) => {
       const conversation = await Conversation.findById(user.connectedUsers)
         .populate("allMessages")
         .populate({
-          path: "participants",
+          path: "participants.user",
           select: "_id username profilePhoto about",
         });
 
