@@ -135,20 +135,20 @@ function LeftSideBar() {
       <div className="flex-1 overflow-y-auto">
         {chat.map((chat) => (
           <Chats
-            key={chat.user._id}
-            id={chat.user._id}
-            name={chat.user.username}
-            logo={chat.user.profilePhoto}
-            newMsgCount={chat.newMsgCount}
+            key={chat.user?._id}
+            id={chat.user?._id}
+            name={chat.user?.username}
+            logo={chat.user?.profilePhoto}
+            newMsgCount={chat?.newMsgCount}
           />
         ))}
 
-        {group?.map((perGroup) => (
+        {group?.map((perGroup, idx) => (
           <GroupChats
-            key={perGroup._id}
-            id={perGroup._id}
-            groupName={perGroup.groupName}
-            logo={perGroup.logo}
+            key={idx}
+            id={perGroup?._id}
+            groupName={perGroup?.groupName}
+            logo={perGroup?.logo}
           />
         ))}
       </div>

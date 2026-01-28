@@ -159,6 +159,7 @@ export const login = async (req, res) => {
         }
       })
       allGroups = user.joinedGroups.map((eachGroup) => ({
+        _id: eachGroup._id,
         groupName: eachGroup.groupName,
         logo: eachGroup.logo
       }));
@@ -264,6 +265,7 @@ export const remember = async (req, res) => {
         }
       })
       allGroups = user.joinedGroups.map((eachGroup) => ({
+        _id: eachGroup._id,
         groupName: eachGroup.groupName,
         logo: eachGroup.logo
       }));

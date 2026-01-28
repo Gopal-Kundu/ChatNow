@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
 import { Users, CheckCircle } from "lucide-react";
 import defaultImg from "../assets/defaultUser.png";
-import { setNewChat } from "../../redux/chatSlice";
+import { setNewChat, setNewGroup } from "../../redux/chatSlice";
 
 function CreateGroup({ onClose }) {
   const dispatch = useDispatch();
@@ -29,16 +29,13 @@ function CreateGroup({ onClose }) {
   function handleLogoChange(e) {
     const file = e.target.files[0];
     if (!file) return;
-
     setLogoFile(file);
     setLogoPreview(URL.createObjectURL(file));
   }
 
   useEffect(() => {
     return () => {
-      if (logoPreview) {
-        URL.revokeObjectURL(logoPreview);
-      }
+      if (logoPreview) URL.revokeObjectURL(logoPreview);
     };
   }, [logoPreview]);
 
@@ -58,11 +55,9 @@ function CreateGroup({ onClose }) {
 
       const formData = new FormData();
       formData.append("groupName", groupName);
-      formData.append("members", selectedUsers); 
+      selectedUsers.forEach((id) => formData.append("members", id));
 
-      if (logoFile) {
-        formData.append("logo", logoFile);
-      }
+      if (logoFile) formData.append("logo", logoFile);
 
       const res = await axios.post(
         `${baseurl}/group/create`,
@@ -71,7 +66,7 @@ function CreateGroup({ onClose }) {
       );
 
       if (res?.data?.success) {
-        dispatch(setNewChat(res.data.group));
+        dispatch(setNewGroup(res.data.group));
         toast.success("Group created successfully");
         onClose();
       }
@@ -85,7 +80,6 @@ function CreateGroup({ onClose }) {
   return (
     <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
       <div className="w-full max-w-md bg-transparent border border-white/20 rounded-2xl p-6 backdrop-blur-xl">
-
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <Users className="text-white" />
@@ -129,36 +123,38 @@ function CreateGroup({ onClose }) {
 
         <div className="max-h-64 overflow-y-auto space-y-2 mb-4">
           {allContacts?.length ? (
-            allContacts.map((user) => {
-              const isSelected = selectedUsers.includes(user._id);
+            allContacts
+              .filter((c) => c?.user?._id)
+              .map((chat) => {
+                const user = chat.user;
+                const isSelected = selectedUsers.includes(user._id);
 
-              return (
-                <div
-                  key={user._id}
-                  onClick={() => toggleUser(user._id)}
-                  className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition
-                    ${
+                return (
+                  <div
+                    key={user._id}
+                    onClick={() => toggleUser(user._id)}
+                    className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition ${
                       isSelected
                         ? "bg-blue-500/30 border border-blue-400"
                         : "bg-white/10 hover:bg-white/20"
                     }`}
-                >
-                  <img
-                    src={user.profilePhoto || defaultImg}
-                    alt={user.username}
-                    className="w-10 h-10 rounded-full object-cover"
-                  />
+                  >
+                    <img
+                      src={user.profilePhoto || defaultImg}
+                      alt={user.username}
+                      className="w-10 h-10 rounded-full object-cover"
+                    />
 
-                  <span className="flex-1 text-white">
-                    {user.username}
-                  </span>
+                    <span className="flex-1 text-white">
+                      {user.username}
+                    </span>
 
-                  {isSelected && (
-                    <CheckCircle className="text-blue-400 w-5 h-5" />
-                  )}
-                </div>
-              );
-            })
+                    {isSelected && (
+                      <CheckCircle className="text-blue-400 w-5 h-5" />
+                    )}
+                  </div>
+                );
+              })
           ) : (
             <h1 className="text-center text-white">No Users Found</h1>
           )}
