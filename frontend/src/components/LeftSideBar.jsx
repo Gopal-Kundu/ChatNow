@@ -90,6 +90,7 @@ function LeftSideBar() {
 
 
   return (
+<>
     <div className="flex flex-col h-[100dvh] border-r border-white/20 bg-transparent">
 
       <div className="flex items-center gap-3 p-4 border-b border-white/20">
@@ -155,9 +156,9 @@ function LeftSideBar() {
       {showCreateGroup && (
         <CreateGroup onClose={() => setShowCreateGroup(false)} />
       )}
-
+</div>
       <Footer />
-    </div>
+    </>
   );
 }
 
