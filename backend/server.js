@@ -38,8 +38,8 @@ export let onlineUsers = {};
 export let activeChats = {};
 
 io.on("connection", (socket) => {
-  console.log("User connected:", socket.id);
-
+  console.log(onlineUsers);
+  console.log(onlineUsers.length);
   socket.on("Connect me", (userId) => {
     socket.userId = userId;
     onlineUsers[userId] = socket.id;

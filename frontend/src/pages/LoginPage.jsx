@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { baseurl } from "../../address/address.js";
 import { setLoading, setUser } from "../../redux/authSlice";
 import { Link, useNavigate } from "react-router-dom";
-import { setAllMsgs, setChats } from "../../redux/chatSlice.js";
+import { setAllMsgs, setChats, setGroupAllMsgs, setGroups } from "../../redux/chatSlice.js";
 
 function LoginPage() {
   const [formData, setFormData] = useState({
@@ -36,6 +36,8 @@ function LoginPage() {
           dispatch(setUser(res.data.user));
           dispatch(setAllMsgs(res.data.allMessages));
           dispatch(setChats(res.data.participants));
+          dispatch(setGroups(res.data.allGroups));
+          dispatch(setGroupAllMsgs(res.data.allGroupMessages));
           navigate("/");
         }
       }
@@ -54,7 +56,7 @@ function LoginPage() {
 
   return (
     <div className='h-screen bg-[url("https://png.pngtree.com/background/20250104/original/pngtree-free-hd-wallpaper-4k-new-background-picture-image_15546678.jpg")] bg-cover bg-center'>
-  
+
       <div className="inter py-4 flex justify-center items-center gap-4">
         <Link to="/">
           <div className="bg-white/50 p-2 px-5 cursor-pointer inline-block  rounded-3xl hover:bg-white/90 transition-colors duration-400">
@@ -66,50 +68,50 @@ function LoginPage() {
         </div>
       </div>
 
-    <div className="fade-in-bottom">
-      <div className="mt-2 flex text-white justify-center items-center gap-1">
-        <div className="montserrat">Have no account?</div>
-        <span className="underline cursor-pointer hover:text-blue-950">
-          <Link to="/">Sign Up</Link>
-        </span>
-      </div>
-
-      <div className="flex justify-center items-center mt-6">
-        <div className="inter inline-block text-3xl font-bold text-white">
-          Login
+      <div className="fade-in-bottom">
+        <div className="mt-2 flex text-white justify-center items-center gap-1">
+          <div className="montserrat">Have no account?</div>
+          <span className="underline cursor-pointer hover:text-blue-950">
+            <Link to="/">Sign Up</Link>
+          </span>
         </div>
-      </div>
 
-      <div className="mt-6 flex justify-center items-center">
-        <form
-          className="flex flex-col justify-center items-center gap-5"
-          onSubmit={handleSubmit}
-        >
-          <input
-            type="number"
-            name="phoneNumber"
-            value={formData.email}
-            onChange={handleChange}
-            placeholder="Phone Number"
-            className="px-5 bg-white/40 p-3 rounded-3xl outline-none focus:bg-white/90 block w-90 transition-colors duration-400 inter"
-            required
-          />
-          <input
-            type="text"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            placeholder="Password"
-            className="px-5 bg-white/40 p-3 rounded-3xl outline-none focus:bg-white/90 block w-90 transition-colors duration-400 inter"
-            required
-          />
-          <button
-            type="submit"
-            className="px-5 bg-white/90 p-3 rounded-3xl outline-none block w-90 active:scale-95 transition-transform duration-200"
+        <div className="flex justify-center items-center mt-6">
+          <div className="inter inline-block text-3xl font-bold text-white">
+            Login
+          </div>
+        </div>
+
+        <div className="mt-6 flex justify-center items-center">
+          <form
+            className="flex flex-col justify-center items-center gap-5"
+            onSubmit={handleSubmit}
           >
-            {loading ? "Logging..." : "Login"}
-          </button>
-        </form>
+            <input
+              type="number"
+              name="phoneNumber"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="Phone Number"
+              className="px-5 bg-white/40 p-3 rounded-3xl outline-none focus:bg-white/90 block w-90 transition-colors duration-400 inter"
+              required
+            />
+            <input
+              type="text"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="Password"
+              className="px-5 bg-white/40 p-3 rounded-3xl outline-none focus:bg-white/90 block w-90 transition-colors duration-400 inter"
+              required
+            />
+            <button
+              type="submit"
+              className="px-5 bg-white/90 p-3 rounded-3xl outline-none block w-90 active:scale-95 transition-transform duration-200"
+            >
+              {loading ? "Logging..." : "Login"}
+            </button>
+          </form>
         </div>
       </div>
     </div>

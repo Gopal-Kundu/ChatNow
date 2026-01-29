@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import { uploadToCloudinary } from "../configs/fileToCloudinary.js";
 import { Group } from "../models/group.model.js";
 import { User } from "../models/user.model.js";
+import { io, onlineUsers } from "../server.js";
 
 export const createGroup = async (req, res) => {
   try {
@@ -67,36 +68,52 @@ export const createGroup = async (req, res) => {
 
 export const sendGroupMessage = async (req, res) => {
   try {
-    const id = req.id;
+    const senderId = req.id.toString();
     const { message } = req.body;
     const groupId = req.params.groupId;
-    if (!id || !message || !groupId) {
-      return res.status(400).json({
-        message: "Something is missing",
-        success: false,
-      })
-    }
-    const group = await Group.findById(groupId);
-    group.messages.push({
-      senderId: id,
-      message: message,
-    })
-    group.save();
-    await group.populate({
-      path: "messages.senderId",
-      select: "-password",
-    })
 
-    const resMsg = group.messages[group.messages.length-1]; 
+    if (!senderId || !message || !groupId) {
+      return res.status(400).json({ success: false, message: "Something is missing" });
+    }
+
+    const group = await Group.findById(groupId);
+    if (!group) {
+      return res.status(404).json({ success: false, message: "Group not found" });
+    }
+
+    group.messages.push({ senderId, message });
+    await group.save();
+
+    await group.populate("messages.senderId", "-password");
+
+    const resMsg = group.messages.at(-1);
+
+    const members = group.members.map(m => m.toString());
+
+    members.forEach(userId => {
+      if (userId !== senderId) {
+        const socketId = getSocketId(userId);
+        if (socketId) {
+          io.to(socketId).emit("group-msg", {
+            groupId,
+            message: resMsg,
+          });
+        }
+      }
+    });
+
     return res.status(200).json({
       success: true,
-      resMsg
-    })
+      info: { groupId, message: resMsg },
+    });
 
   } catch (err) {
-    return res.status(400).json({
-      success: false,
-      message: "Server error",
-    })
+    console.error(err);
+    return res.status(500).json({ success: false, message: "Server error" });
   }
+};
+
+function getSocketId(userId) {
+  return onlineUsers[userId.toString()];
 }
+

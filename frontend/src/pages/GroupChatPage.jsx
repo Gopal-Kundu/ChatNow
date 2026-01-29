@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import NavBarforGroupPage from "../components/NavBarforGroupPage";
 import GroupChatSection from "../components/GroupChatSection";
+import GroupInputBox from "../components/GroupInputBox";
 
 export function GroupChatPage() {
   const { id } = useParams();
@@ -35,6 +36,7 @@ export function GroupChatPage() {
     >
       <NavBarforGroupPage />
       <GroupChatSection/>
+      <GroupInputBox/>
     </div>
   );
 }

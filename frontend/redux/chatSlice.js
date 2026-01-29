@@ -72,7 +72,11 @@ const chatSlice = createSlice({
       state.groupMsgContainer = action.payload;
     },
     setGroupMsg: (state, action) => {
-      state.groupMsgContainer.push(action.payload);
+      const { groupId, message } = action.payload;
+      const group = state.groupMsgContainer.find(
+        (g) => String(g.groupId) === String(groupId)
+      );
+        group.messages.push(message);
     },
     setNewGroup: (state, action) => {
       const exists = state.groups.find(

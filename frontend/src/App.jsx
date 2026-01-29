@@ -9,7 +9,7 @@ import { setOnlineUsers } from "../redux/socketSlice";
 import UpdateProfilePage from "./pages/UpdateProfilePage";
 import axios from "axios";
 import { setUser } from "../redux/authSlice";
-import { setAllMsgs, setChats, setGroupAllMsgs, setGroups, setMsg, setNewChat, setNewMsgCount } from "../redux/chatSlice";
+import { setAllMsgs, setChats, setGroupAllMsgs, setGroupMsg, setGroups, setMsg, setNewChat, setNewMsgCount } from "../redux/chatSlice";
 import { RightSideBar } from "./components/RightSideBar";
 import LoadingPage from "./pages/LoadingPage";
 import CreateGroup from "./pages/CreateGroup";
@@ -84,10 +84,17 @@ const App = () => {
   const handleNewMsgCount = (data) => {
     dispatch(setNewMsgCount(data));
   }
+  const handleGroupNewMsg = (data) => {
+    console.log("new Group msg");
+    dispatch(setGroupMsg(data));
+  }
+
+  socket.on("group-msg", handleGroupNewMsg);
   socket.on("New_Msg_Count", handleNewMsgCount);
   socket.on("New_Chat", handleIncomingChat);
   socket.on("Msg_from_sender", handleIncomingMessage);
   return () => {
+    socket.off("group-msg", handleGroupNewMsg);
     socket.off("New_Msg_Count", handleNewMsgCount);
     socket.off("New_Chat", handleIncomingChat);
     socket.off("Msg_from_sender", handleIncomingMessage);
