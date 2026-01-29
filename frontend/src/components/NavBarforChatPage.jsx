@@ -21,7 +21,7 @@ function NavBarforChatPage() {
   }
 
   return (
-    <div className="sticky z-[10] top-0">
+    <div className="select-none sticky z-[10] top-0">
       <div className="p-2 flex items-center flex-row h-[8vh] md:h-[12vh] bg-indigo-400">
         <ArrowLeft
           className="text-white size-8"

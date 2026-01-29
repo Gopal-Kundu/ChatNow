@@ -42,7 +42,7 @@ function GroupInputBox() {
   }
 
   return (
-    <div className="sticky bottom-0 w-full px-4 py-3 bg-gradient-to-t from-black/80 via-black/60 to-transparent backdrop-blur-xl">
+    <div className="select-none sticky bottom-0 w-full px-4 py-3 bg-gradient-to-t from-black/80 via-black/60 to-transparent backdrop-blur-xl">
       <div className="flex items-center gap-3 max-w-5xl mx-auto">
         <input
           type="text"

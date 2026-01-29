@@ -53,7 +53,7 @@ function UpdateProfilePage() {
   }
 
   return (
-    <div className="min-h-screen w-full bg-[#121212] flex justify-center items-start pt-12 text-white px-4">
+    <div className="select-none min-h-screen w-full bg-[#121212] flex justify-center items-start pt-12 text-white px-4">
       {open && <ProfileForm open={open} setOpen={setOpen} />}
 
       <div className="w-full max-w-md bg-[#1e1e2f] rounded-2xl shadow-2xl flex flex-col items-center p-8 gap-6">

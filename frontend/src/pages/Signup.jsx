@@ -45,7 +45,7 @@ function Signup() {
   };
 
   return (
-    <div className='h-screen bg-[url("https://png.pngtree.com/background/20250104/original/pngtree-free-hd-wallpaper-4k-new-background-picture-image_15546678.jpg")] bg-cover bg-center'>
+    <div className='select-none h-screen bg-[url("https://png.pngtree.com/background/20250104/original/pngtree-free-hd-wallpaper-4k-new-background-picture-image_15546678.jpg")] bg-cover bg-center'>
        
       <div className="inter py-4 flex justify-center items-center gap-4">
         <div className="bg-white p-2 px-5 cursor-pointer inline-block  rounded-3xl hover:bg-white/80 transition-colors duration-400">

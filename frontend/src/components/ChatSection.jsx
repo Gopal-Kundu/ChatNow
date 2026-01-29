@@ -31,7 +31,7 @@ function ChatSection({ theirId }) {
   return (
     <div
       ref={containerRef}
-      className="webkit-scrollbar flex-1 overflow-y-auto"
+      className="select-none webkit-scrollbar flex-1 overflow-y-auto"
     >
       {loading ? (
         <LoadingPage />

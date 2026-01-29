@@ -19,7 +19,7 @@ function GroupMessage({
 
   return (
     <div
-      className={`flex my-1 ${
+      className={`select-none flex my-1 ${
         isMe ? "mr-10 justify-end" : "ml-10 justify-start"
       }`}
     >

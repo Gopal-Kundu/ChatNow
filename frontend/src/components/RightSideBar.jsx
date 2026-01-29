@@ -59,7 +59,7 @@ export function RightSideBar() {
 
   return (
     <div
-      className="flex flex-col"
+      className="flex flex-col select-none"
       style={{
         height: `${viewportHeight}px`,
         backgroundImage: `url(${bg})`,

@@ -11,7 +11,7 @@ function Message({ user, text, createdAt }) {
 
   return (
     <div
-      className={`flex max-w-screen my-1 ${user === "true" ? "mr-10 justify-end" : "ml-10 justify-start"
+      className={`select-none flex max-w-screen my-1 ${user === "true" ? "mr-10 justify-end" : "ml-10 justify-start"
         }`}
     >
       <div

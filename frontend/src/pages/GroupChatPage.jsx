@@ -27,7 +27,7 @@ export function GroupChatPage() {
 
   return (
     <div
-      className="flex flex-col"
+      className="select-none flex flex-col"
       style={{
         height: `${viewportHeight}px`,
         backgroundImage: `url(${bg})`,
