@@ -34,7 +34,6 @@ function GroupInputBox() {
         }
       );
       if(res.data.success){
-        console.log("Set Sender Message");
         dispatch(setGroupMsg(res.data.info));
       }
     } catch (err) {

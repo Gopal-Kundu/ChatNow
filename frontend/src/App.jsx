@@ -85,7 +85,6 @@ const App = () => {
     dispatch(setNewMsgCount(data));
   }
   const handleGroupNewMsg = (data) => {
-    console.log("new Group msg");
     dispatch(setGroupMsg(data));
   }
 

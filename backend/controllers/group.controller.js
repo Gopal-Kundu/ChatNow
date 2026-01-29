@@ -68,52 +68,55 @@ export const createGroup = async (req, res) => {
 
 export const sendGroupMessage = async (req, res) => {
   try {
-    const senderId = req.id.toString();
+    const id = req.id;
     const { message } = req.body;
     const groupId = req.params.groupId;
 
-    if (!senderId || !message || !groupId) {
-      return res.status(400).json({ success: false, message: "Something is missing" });
+    if (!id || !message || !groupId) {
+      return res.status(400).json({
+        message: "Something is missing",
+        success: false,
+      })
     }
-
     const group = await Group.findById(groupId);
-    if (!group) {
-      return res.status(404).json({ success: false, message: "Group not found" });
-    }
-
-    group.messages.push({ senderId, message });
+    group.messages.push({
+      senderId: id,
+      message: message,
+    })
     await group.save();
+    await group.populate({
+      path: "messages.senderId",
+      select: "-password",
+    })
 
-    await group.populate("messages.senderId", "-password");
+    const resMsg = group.messages[group.messages.length - 1];
+    console.log("My Current Id:", id);
+    console.log(group.members);
+    let members = group.members.map((eachMember)=> eachMember.toString()) || [];
+    console.log(members);
 
-    const resMsg = group.messages.at(-1);
-
-    const members = group.members.map(m => m.toString());
-
-    members.forEach(userId => {
-      if (userId !== senderId) {
-        const socketId = getSocketId(userId);
-        if (socketId) {
-          io.to(socketId).emit("group-msg", {
+          io.emit("group-msg", {
             groupId,
             message: resMsg,
           });
-        }
-      }
-    });
 
     return res.status(200).json({
       success: true,
-      info: { groupId, message: resMsg },
-    });
+      info: {
+        groupId,
+        message: resMsg
+      }
+    })
 
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ success: false, message: "Server error" });
+    console.log(err);
+    return res.status(400).json({
+      success: false,
+      message: "Server error",
+    })
   }
-};
-
-function getSocketId(userId) {
-  return onlineUsers[userId.toString()];
 }
 
+function getSocketId(userId) {
+  return onlineUsers[userId];
+}

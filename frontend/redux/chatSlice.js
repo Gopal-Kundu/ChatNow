@@ -76,8 +76,15 @@ const chatSlice = createSlice({
       const group = state.groupMsgContainer.find(
         (g) => String(g.groupId) === String(groupId)
       );
+      if (!group) return;
+      const exists = group.messages.some(
+        (msg) => String(msg._id) === String(message._id)
+      );
+      if (!exists) {
         group.messages.push(message);
+      }
     },
+
     setNewGroup: (state, action) => {
       const exists = state.groups.find(
         (u) => u._id === action.payload._id
