@@ -1,15 +1,56 @@
 import mongoose from "mongoose";
 
-const group = new mongoose.Schema({
-    groupName: {type: String, required: true},
-    logo: {type: String, default: "https://shorturl.at/nuCHP"},
-    members: [{type: mongoose.Schema.Types.ObjectId, ref: "User"}],
-    messages: [{
-        senderId: {type: mongoose.Schema.Types.ObjectId, ref: "User"},
-        message: {type: String, default: ""},
-        time: {type: Date, default: Date.now}
-    }],
-    admins: [{type: mongoose.Schema.Types.ObjectId, ref: "User"}]
-});
+const groupSchema = new mongoose.Schema(
+    {
+        groupName: {
+            type: String,
+            required: true,
+            default: "New Group",
+            trim: true,
+        },
 
-export const Group = mongoose.model("Group", group);
+        logo: {
+            type: String,
+            default: "https://shorturl.at/nuCHP",
+        },
+
+        members: {
+            type: [mongoose.Schema.Types.ObjectId],
+            ref: "User",
+            default: [],
+        },
+
+        messages: {
+            type: [
+                {
+                    senderId: {
+                        type: mongoose.Schema.Types.ObjectId,
+                        ref: "User",
+                        default: null,
+                    },
+                    message: {
+                        type: String,
+                        default: "",
+                        trim: true,
+                    },
+                    time: {
+                        type: Date,
+                        default: Date.now,
+                    },
+                },
+            ],
+            default: [],
+        },
+
+        admins: {
+            type: [mongoose.Schema.Types.ObjectId],
+            ref: "User",
+            default: [],
+        },
+    },
+    {
+        timestamps: true,
+    }
+);
+
+export const Group = mongoose.model("Group", groupSchema);

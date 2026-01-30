@@ -51,7 +51,7 @@ export const createGroup = async (req, res) => {
         $addToSet: { joinedGroups: newGroup._id },
       }
     );
-
+    io.emit("create-group", newGroup);
     return res.status(201).json({
       success: true,
       message: "Group created successfully",
@@ -116,6 +116,61 @@ export const sendGroupMessage = async (req, res) => {
     })
   }
 }
+
+export const deleteGroupFromUser = async (req, res) => {
+  try {
+    const userId = req.id; 
+    const { groupId } = req.params;
+
+    if (!groupId) {
+      return res.status(400).json({
+        success: false,
+        message: "Group ID is required",
+      });
+    }
+    await User.findByIdAndUpdate(userId, {
+      $pull: { joinedGroups: groupId },
+    });
+
+    const group = await Group.findByIdAndUpdate(
+      groupId,
+      {
+        $pull: {
+          members: userId,
+          admins: userId,
+        },
+      },
+      { new: true }
+    );
+
+    if (!group) {
+      return res.status(404).json({
+        success: false,
+        message: "Group not found",
+      });
+    }
+
+    if (group.admins.length === 0 && group.members.length > 0) {
+      group.admins.push(group.members[0]);
+      await group.save();
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Group removed from user successfully",
+      groupId,
+      newAdmin: group.admins[0] || null,
+    });
+
+  } catch (error) {
+    console.error("Delete Group Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
 
 function getSocketId(userId) {
   return onlineUsers[userId];

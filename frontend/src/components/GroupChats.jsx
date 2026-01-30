@@ -4,36 +4,39 @@ import defaultGroupImg from "../assets/defaultUser.png";
 import { Trash2, Users } from "lucide-react";
 import axios from "axios";
 import { baseurl } from "../../address/address";
+import { useDispatch } from "react-redux";
+import { deleteGroup } from "../../redux/chatSlice";
 
 function GroupChats({ id, groupName, logo }) {
   const navigate = useNavigate();
   const [showPopup, setShowPopup] = useState(false);
+  const dispatch = useDispatch();
 
   function openGroupChat() {
-    navigate(`group-chat/${id}`);
+    navigate(`/group-chat/${id}`);
   }
 
-  async function deleteGroup() {
+  async function handleDeleteGroup() {
     try {
-      const res = await axios.delete(`${baseurl}/group/${id}`, {
+      const res = await axios.get(`${baseurl}/delete-group/${id}`, {
         withCredentials: true,
       });
-      setShowPopup(false);
+
+      if (res.data.success) {
+        dispatch(deleteGroup(id));
+      }
     } catch (err) {
-      console.error("Delete group failed");
+      console.error("Delete group failed", err);
+    } finally {
+      setShowPopup(false);
     }
   }
 
   return (
     <div className="select-none cursor-pointer">
-      <div
-        className="flex items-center gap-3 px-4 py-3 w-full
-                   bg-white/10 hover:bg-white/20
-                   transition-colors duration-200
-                   border-b border-white/10"
-      >
+      <div className="flex items-center gap-3 px-4 py-3 w-full bg-white/10 hover:bg-white/20 transition-colors duration-200 border-b border-white/10">
         <div className="shrink-0">
-          <Link to={`group-profile/${id}`}>
+          <Link to={`/group-profile/${id}`}>
             <div className="h-11 w-11 rounded-full overflow-hidden border border-white/20">
               <img
                 src={logo || defaultGroupImg}
@@ -55,9 +58,7 @@ function GroupChats({ id, groupName, logo }) {
 
         <button
           onClick={() => setShowPopup(true)}
-          className="p-2 rounded-full text-gray-400
-                     hover:text-red-500 hover:bg-red-500/10
-                     transition-all"
+          className="p-2 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-500/10 transition-all"
         >
           <Trash2 size={18} />
         </button>
@@ -67,10 +68,10 @@ function GroupChats({ id, groupName, logo }) {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
           <div className="bg-gray-900 rounded-2xl p-6 w-80 border border-white/10">
             <h3 className="text-white text-lg font-semibold mb-2">
-              Delete Group?
+              Leave Group?
             </h3>
             <p className="text-gray-400 text-sm mb-6">
-              This will permanently delete the group and its chats.
+              This will remove you from the group.
             </p>
 
             <div className="flex justify-end gap-3">
@@ -82,10 +83,10 @@ function GroupChats({ id, groupName, logo }) {
               </button>
 
               <button
-                onClick={deleteGroup}
+                onClick={handleDeleteGroup}
                 className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-500 transition"
               >
-                Delete
+                Leave
               </button>
             </div>
           </div>

@@ -84,15 +84,34 @@ const chatSlice = createSlice({
         group.messages.push(message);
       }
     },
-
     setNewGroup: (state, action) => {
       const exists = state.groups.find(
-        (u) => u._id === action.payload._id
+        (g) => String(g._id) === String(action.payload._id)
       );
-      if (!exists) state.groups.push(action.payload);
+      if (!exists) {
+        state.groups.push(action.payload);
+      }
+      const msgContainerGroupExist = state.groupMsgContainer.find(
+        (g) => String(g.groupId) === String(action.payload._id)
+      );
+      if (!msgContainerGroupExist) {
+        state.groupMsgContainer.push({
+          groupId: action.payload._id,
+          messages: [],
+        });
+      }
+    },
+    deleteGroup: (state, action) => {
+      const groupId = action.payload;
+      state.groups = state.groups.filter(
+        (g) => String(g._id) !== String(groupId)
+      );
+      state.groupMsgContainer = state.groupMsgContainer.filter(
+        (g) => String(g.groupId) !== String(groupId)
+      );
     },
   }
 });
 
-export const { setChats, setMsg, setAllMsgs, setNewChat, deleteUser, setNewGroup, setGroupMsg, setGroupAllMsgs, setGroups, setNewMsgCount, setNewMsgCountToZero } = chatSlice.actions;
+export const { setChats, setMsg, setAllMsgs, deleteGroup, setNewChat, deleteUser, setNewGroup, setGroupMsg, setGroupAllMsgs, setGroups, setNewMsgCount, setNewMsgCountToZero } = chatSlice.actions;
 export default chatSlice.reducer;
