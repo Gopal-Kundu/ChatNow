@@ -10,9 +10,9 @@ import { setNewChat, setNewGroup } from "../../redux/chatSlice";
 function CreateGroup({ onClose }) {
   const dispatch = useDispatch();
   const allContacts = useSelector((state) => state.chat.chats);
-
+  const admin = useSelector((state)=> state.auth.user)?._id;
   const [groupName, setGroupName] = useState("");
-  const [selectedUsers, setSelectedUsers] = useState([]);
+  const [selectedUsers, setSelectedUsers] = useState([admin]);
   const [loading, setLoading] = useState(false);
 
   const [logoFile, setLogoFile] = useState(null);

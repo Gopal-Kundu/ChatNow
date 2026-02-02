@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import { uploadToCloudinary } from "../configs/fileToCloudinary.js";
 import { Group } from "../models/group.model.js";
 import { User } from "../models/user.model.js";
-import { io, onlineUsers } from "../server.js";
+import { activeGroupChats, io, onlineUsers } from "../server.js";
 
 export const createGroup = async (req, res) => {
   try {
@@ -24,12 +24,6 @@ export const createGroup = async (req, res) => {
       });
     }
 
-    if (typeof members === "string") {
-      members = [members];
-    }
-
-    members = members.map(id => new mongoose.Types.ObjectId(id));
-
     if (req.file) {
       logo = await uploadToCloudinary(req.file);
     }
@@ -41,14 +35,15 @@ export const createGroup = async (req, res) => {
       admins: [adminId],
     });
 
-    await User.findByIdAndUpdate(adminId, {
-      $addToSet: { joinedGroups: newGroup._id },
-    });
-
     await User.updateMany(
       { _id: { $in: members } },
       {
-        $addToSet: { joinedGroups: newGroup._id },
+        $addToSet: {
+          joinedGroups: {
+            groups: newGroup._id,
+            newMsgCount: 0
+          }
+        }
       }
     );
     io.emit("create-group", newGroup);
@@ -68,58 +63,58 @@ export const createGroup = async (req, res) => {
 
 export const sendGroupMessage = async (req, res) => {
   try {
-    const id = req.id;
+    const senderId = req.id;
     const { message } = req.body;
     const groupId = req.params.groupId;
 
-    if (!id || !message || !groupId) {
-      return res.status(400).json({
-        message: "Something is missing",
-        success: false,
-      })
+    if (!senderId || !message || !groupId) {
+      return res.status(400).json({ success: false, message: "Missing info" });
     }
+
     const group = await Group.findById(groupId);
-    group.messages.push({
-      senderId: id,
-      message: message,
-    })
+    if (!group) return res.status(404).json({ success: false, message: "Group not found" });
+
+    group.messages.push({ senderId, message });
     await group.save();
+
     await group.populate({
       path: "messages.senderId",
-      select: "-password",
-    })
+      select: "_id username profilePhoto",
+    });
 
     const resMsg = group.messages[group.messages.length - 1];
-    console.log("My Current Id:", id);
-    console.log(group.members);
-    let members = group.members.map((eachMember)=> eachMember.toString()) || [];
-    console.log(members);
 
-          io.emit("group-msg", {
-            groupId,
-            message: resMsg,
-          });
+    const membersToUpdate = group.members
+      .map(id => id.toString())
+      .filter(userId => 
+        userId !== senderId.toString() && !activeGroupChats.has(userId)
+      );
 
-    return res.status(200).json({
-      success: true,
-      info: {
-        groupId,
-        message: resMsg
-      }
-    })
+    if (membersToUpdate.length > 0) {
+      await User.updateMany(
+        {
+          _id: { $in: membersToUpdate },
+          "joinedGroups.groups": groupId,
+        },
+        {
+          $inc: { "joinedGroups.$.newMsgCount": 1 },
+        }
+      );
+    }
 
+    io.emit("group-msg", { groupId, message: resMsg });
+    io.emit("new_group_Msg", { members: membersToUpdate, groupId });
+
+    return res.status(200).json({ success: true, info: { groupId, message: resMsg } });
   } catch (err) {
-    console.log(err);
-    return res.status(400).json({
-      success: false,
-      message: "Server error",
-    })
+    console.error(err);
+    return res.status(500).json({ success: false, message: "Server error" });
   }
-}
+};
 
 export const deleteGroupFromUser = async (req, res) => {
   try {
-    const userId = req.id; 
+    const userId = req.id;
     const { groupId } = req.params;
 
     if (!groupId) {
@@ -129,7 +124,9 @@ export const deleteGroupFromUser = async (req, res) => {
       });
     }
     await User.findByIdAndUpdate(userId, {
-      $pull: { joinedGroups: groupId },
+      $pull: {
+        joinedGroups: { groups: groupId }
+      }
     });
 
     const group = await Group.findByIdAndUpdate(
@@ -171,6 +168,49 @@ export const deleteGroupFromUser = async (req, res) => {
   }
 };
 
+export const resetGroupMsgCount = async (req, res) => {
+  try {
+    const userId = req.id;
+    const groupId = req.params.groupId;
+
+    if (!userId || !groupId) {
+      return res.status(400).json({
+        success: false,
+        message: "UserId or GroupId missing",
+      });
+    }
+
+    const updatedUser = await User.findOneAndUpdate(
+      {
+        _id: userId,
+        "joinedGroups.groups": groupId, 
+      },
+      {
+        $set: { "joinedGroups.$.newMsgCount": 0 }, 
+      },
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({
+        success: false,
+        message: "Group not found in user's joinedGroups",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Group message count reset successfully",
+    });
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+}
 
 function getSocketId(userId) {
   return onlineUsers[userId];

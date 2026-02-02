@@ -146,6 +146,7 @@ function LeftSideBar() {
             id={perGroup?._id}
             groupName={perGroup?.groupName}
             logo={perGroup?.logo}
+            newMsgCount = {perGroup?.count}
           />
         ))}
       </div>

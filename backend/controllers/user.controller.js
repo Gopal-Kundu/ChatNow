@@ -152,21 +152,22 @@ export const login = async (req, res) => {
     let allGroupMessages = [];
     if (user.joinedGroups) {
       await user.populate({
-        path: "joinedGroups",
+        path: "joinedGroups.groups",
         populate: {
           path: "messages.senderId",
           select: "_id username profilePhoto about"
         }
       })
       allGroups = user.joinedGroups.map((eachGroup) => ({
-        _id: eachGroup._id,
-        groupName: eachGroup.groupName,
-        logo: eachGroup.logo
+        _id: eachGroup.groups._id,
+        groupName: eachGroup.groups.groupName,
+        logo: eachGroup.groups.logo,
+        count: eachGroup.newMsgCount
       }));
 
       allGroupMessages = user.joinedGroups.map((eachGroup) => ({
-        groupId: eachGroup._id,
-        messages: eachGroup.messages,
+        groupId: eachGroup.groups._id,
+        messages: eachGroup.groups.messages,
       }))
     }
 
@@ -258,21 +259,22 @@ export const remember = async (req, res) => {
     let allGroupMessages = [];
     if (user.joinedGroups) {
       await user.populate({
-        path: "joinedGroups",
+        path: "joinedGroups.groups",
         populate: {
           path: "messages.senderId",
           select: "_id username profilePhoto about"
         }
       })
       allGroups = user.joinedGroups.map((eachGroup) => ({
-        _id: eachGroup._id,
-        groupName: eachGroup.groupName,
-        logo: eachGroup.logo
+        _id: eachGroup.groups._id,
+        groupName: eachGroup.groups.groupName,
+        logo: eachGroup.groups.logo,
+        count: eachGroup.newMsgCount
       }));
 
       allGroupMessages = user.joinedGroups.map((eachGroup) => ({
-        groupId: eachGroup._id,
-        messages: eachGroup.messages
+        groupId: eachGroup.groups._id,
+        messages: eachGroup.groups.messages
       }))
     }
 

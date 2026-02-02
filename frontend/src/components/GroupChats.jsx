@@ -7,7 +7,7 @@ import { baseurl } from "../../address/address";
 import { useDispatch } from "react-redux";
 import { deleteGroup } from "../../redux/chatSlice";
 
-function GroupChats({ id, groupName, logo }) {
+function GroupChats({ id, groupName, logo, newMsgCount }) {
   const navigate = useNavigate();
   const [showPopup, setShowPopup] = useState(false);
   const dispatch = useDispatch();
@@ -34,27 +34,33 @@ function GroupChats({ id, groupName, logo }) {
 
   return (
     <div className="select-none cursor-pointer">
-      <div className="flex items-center gap-3 px-4 py-3 w-full bg-white/10 hover:bg-white/20 transition-colors duration-200 border-b border-white/10">
-        <div className="shrink-0">
-          <Link to={`/group-profile/${id}`}>
-            <div className="h-11 w-11 rounded-full overflow-hidden border border-white/20">
-              <img
-                src={logo || defaultGroupImg}
-                alt="Group"
-                className="h-full w-full object-cover"
-              />
-            </div>
-          </Link>
-        </div>
+      
+      <div className="relative flex items-center gap-3 px-4 py-3 w-full bg-white/10 hover:bg-white/20 transition-colors duration-200 border-b border-white/10">
+        
+        <Link to={`/group-profile/${id}`} className="shrink-0">
+          <div className="h-11 w-11 rounded-full overflow-hidden border border-white/20">
+            <img
+              src={logo || defaultGroupImg}
+              alt="Group"
+              className="h-full w-full object-cover"
+            />
+          </div>
+        </Link>
 
         <div onClick={openGroupChat} className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <p className="text-white font-semibold text-xl truncate">
+            <p className="text-white font-semibold text-lg truncate">
               {groupName}
             </p>
-            <Users size={20} className="text-blue-400" />
+            <Users size={18} className="text-blue-400" />
           </div>
         </div>
+
+        {newMsgCount > 0 && (
+          <div className="mr-2 flex items-center justify-center min-w-[22px] h-[22px] bg-green-500 text-white text-xs font-bold rounded-full px-1">
+            {newMsgCount}
+          </div>
+        )}
 
         <button
           onClick={() => setShowPopup(true)}

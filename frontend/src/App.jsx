@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Routes, Route, useNavigate } from "react-router-dom";
+import React, { useEffect, useState, useRef } from "react";
+import { Routes, Route } from "react-router-dom";
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import { io } from "socket.io-client";
@@ -9,26 +9,35 @@ import { setOnlineUsers } from "../redux/socketSlice";
 import UpdateProfilePage from "./pages/UpdateProfilePage";
 import axios from "axios";
 import { setUser } from "../redux/authSlice";
-import { setAllMsgs, setChats, setGroupAllMsgs, setGroupMsg, setGroups, setMsg, setNewChat, setNewGroup, setNewMsgCount } from "../redux/chatSlice";
+import {
+  increaseMsg,
+  setAllMsgs,
+  setChats,
+  setGroupAllMsgs,
+  setGroupMsg,
+  setGroupMsgToZero,
+  setGroups,
+  setMsg,
+  setNewChat,
+  setNewGroup,
+  setNewMsgCount,
+} from "../redux/chatSlice";
 import { RightSideBar } from "./components/RightSideBar";
 import LoadingPage from "./pages/LoadingPage";
-import CreateGroup from "./pages/CreateGroup";
-import GroupChats from "./components/GroupChats";
 import { GroupChatPage } from "./pages/GroupChatPage";
 
 export let socket;
 
 const App = () => {
   const user = useSelector((store) => store.auth.user);
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
-  const navigate = useNavigate();
-    
-  
+  const socketRef = useRef(null);
+
   useEffect(() => {
-      const remember = async () => {
+    const remember = async () => {
       try {
-         setLoading(true);
+        setLoading(true);
         const res = await axios.get(`${baseurl}/remember`, {
           withCredentials: true,
         });
@@ -42,77 +51,87 @@ const App = () => {
         }
       } catch (err) {
         console.error("No active session");
-      }finally{
-       setLoading(false)
+      } finally {
+        setLoading(false);
       }
     };
+
     remember();
-  }, []);
+  }, [dispatch]);
 
+  useEffect(() => {
+    if (!user) return;
 
-  useEffect(()=>{
-    if(!user) return;
-    socket = io(`${baseurl}`);
+    socketRef.current = io(baseurl);
+    socket = socketRef.current;
+
     socket.emit("Connect me", user._id);
-    socket.on("Connected users", (data)=>{
-      dispatch(setOnlineUsers(data));
-    })
 
-    socket.on("Disconnected users", (data)=>{
-      dispatch(setOnlineUsers(data));
-    })
+    const handleOnline = (data) => dispatch(setOnlineUsers(data));
+
+    socket.on("Connected users", handleOnline);
+    socket.on("Disconnected users", handleOnline);
 
     return () => {
-    socket.off("Connected users");
-    socket.off("Disconnected users");
-    socket.disconnect();
-  };
-
+      socket.off("Connected users", handleOnline);
+      socket.off("Disconnected users", handleOnline);
+      socket.disconnect();
+      socketRef.current = null;
+    };
   }, [user, dispatch]);
 
   useEffect(() => {
-  if (!socket) return;
-  const handleIncomingMessage = (newMessage) => {
-    dispatch(setMsg(newMessage));
-  };
-  const handleIncomingChat = (newChat) => {
-    const data = {
-      user: newChat
-    }
-    dispatch(setNewChat(data));
-  }
-  const handleNewMsgCount = (data) => {
-    dispatch(setNewMsgCount(data));
-  }
-  const handleGroupNewMsg = (data) => {
-    dispatch(setGroupMsg(data));
-  }
-  const handleCreateGroup = (data) => {
-    if(data.members.includes(user._id))
-    dispatch(setNewGroup(data));
-  }
-  socket.on("group-msg", handleGroupNewMsg);
-  socket.on("New_Msg_Count", handleNewMsgCount);
-  socket.on("New_Chat", handleIncomingChat);
-  socket.on("Msg_from_sender", handleIncomingMessage);
-  socket.on("create-group", handleCreateGroup);
-  return () => {
-    socket.off("group-msg", handleGroupNewMsg);
-    socket.off("New_Msg_Count", handleNewMsgCount);
-    socket.off("New_Chat", handleIncomingChat);
-    socket.off("Msg_from_sender", handleIncomingMessage);
-    socket.off("create-group", handleCreateGroup);
-  };
-}, [user]);
- 
-  if(loading) return <LoadingPage/>
+    if (!socket || !user) return;
+
+    const handleIncomingMessage = (msg) => dispatch(setMsg(msg));
+
+    const handleIncomingChat = (chat) =>
+      dispatch(setNewChat({ user: chat }));
+
+    const handleNewMsgCount = (data) =>
+      dispatch(setNewMsgCount(data));
+
+    const handleGroupMsg = (data) =>
+      dispatch(setGroupMsg(data));
+
+    const handleCreateGroup = (data) => {
+      if (data.members.includes(user._id)) {
+        dispatch(setNewGroup(data));
+      }
+    };
+
+    const handleIncreaseGroupCount = (data) => {
+      if (data.members.includes(user._id)) {
+        dispatch(increaseMsg(data));
+      }
+    };
+
+    socket.on("Msg_from_sender", handleIncomingMessage);
+    socket.on("New_Chat", handleIncomingChat);
+    socket.on("New_Msg_Count", handleNewMsgCount);
+    socket.on("group-msg", handleGroupMsg);
+    socket.on("create-group", handleCreateGroup);
+    socket.on("new_group_Msg", handleIncreaseGroupCount);
+
+    return () => {
+      socket.off("Msg_from_sender", handleIncomingMessage);
+      socket.off("New_Chat", handleIncomingChat);
+      socket.off("New_Msg_Count", handleNewMsgCount);
+      socket.off("group-msg", handleGroupMsg);
+      socket.off("create-group", handleCreateGroup);
+      socket.off("new_group_Msg", handleIncreaseGroupCount);
+    };
+  }, [user, dispatch]);
+
+  if (loading) return <LoadingPage />;
+
   return (
     <div className="bg-black">
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/chat/:id" element={<RightSideBar />} />
-        <Route path="group-chat/:id" element={<GroupChatPage/>}/>
+        <Route path="/group-chat/:id" element={<GroupChatPage />} />
         <Route path="/profile" element={<UpdateProfilePage />} />
         <Route path="/profile/:id" element={<UpdateProfilePage />} />
       </Routes>

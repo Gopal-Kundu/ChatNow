@@ -35,11 +35,9 @@ export const io = new Server(server, {
 });
 
 export let onlineUsers = {};
+export let activeGroupChats = new Map();
 export let activeChats = {};
-
 io.on("connection", (socket) => {
-  console.log(onlineUsers);
-  console.log(onlineUsers.length);
   socket.on("Connect me", (userId) => {
     socket.userId = userId;
     onlineUsers[userId] = socket.id;
@@ -51,6 +49,16 @@ io.on("connection", (socket) => {
       activeChats[socket.userId] = chatUserId;
     }
   });
+
+
+  socket.on("ACTIVE_GROUP_CHAT", (data) => {
+    activeGroupChats.set(data.userId, data.groupId);
+  });
+
+  socket.on("LEAVE_GROUP_CHAT", (data) => {
+    activeGroupChats.delete(data.userId);
+  });
+
 
   socket.on("disconnect", () => {
     for (let [k, v] of Object.entries(onlineUsers)) {
