@@ -7,8 +7,12 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import http from "http";
 import { Server } from "socket.io";
+import { hitApi } from "./AwakeRender/awakeRenderService.js";
 
 dotenv.config();
+
+setInterval(()=>hitApi("https://chatnow-ns9r.onrender.com"), 30 * 60 * 1000); //Running Render Server Infinitely 
+
 
 const app = express();
 const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:5173";

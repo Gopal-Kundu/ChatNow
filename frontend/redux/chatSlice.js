@@ -148,8 +148,19 @@ const chatSlice = createSlice({
         }
       });
     },
+
+
+    replaceTempMsg: (state, action) => {
+      const { tempId, realMsg } = action.payload;
+      const index = state.msgContainer.findIndex((msg) => msg._id === tempId);
+      if (index !== -1) {
+        state.msgContainer[index] = realMsg;
+      }
+    },
+
+
   }
 });
 
-export const { setChats, updateMessagesToSeen, updateSingleMessageToSeen, setGroupMsgToZero, setMsg, setAllMsgs, deleteGroup, setNewChat, deleteUser, setNewGroup, setGroupMsg, setGroupAllMsgs, setGroups, setNewMsgCount, setNewMsgCountToZero, increaseMsg } = chatSlice.actions;
+export const {replaceTempMsg, setChats, updateMessagesToSeen, updateSingleMessageToSeen, setGroupMsgToZero, setMsg, setAllMsgs, deleteGroup, setNewChat, deleteUser, setNewGroup, setGroupMsg, setGroupAllMsgs, setGroups, setNewMsgCount, setNewMsgCountToZero, increaseMsg } = chatSlice.actions;
 export default chatSlice.reducer;

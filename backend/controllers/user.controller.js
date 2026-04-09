@@ -6,7 +6,6 @@ import { uploadToCloudinary } from "../configs/fileToCloudinary.js";
 import { Conversation } from "../models/conversation.model.js";
 dotenv.config({ quiet: true });
 
-
 export const register = async (req, res) => {
   try {
     const { username, phoneNumber, password } = req.body;
@@ -40,7 +39,6 @@ export const register = async (req, res) => {
   }
 };
 
-
 export const update = async (req, res) => {
   try {
     const id = req.id;
@@ -69,7 +67,6 @@ export const update = async (req, res) => {
   }
 };
 
-
 export const uploadProfilePhoto = async (req, res) => {
   try {
     if (!req.file) {
@@ -89,7 +86,6 @@ export const uploadProfilePhoto = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
-
 
 export const login = async (req, res) => {
   try {
@@ -118,6 +114,9 @@ export const login = async (req, res) => {
       });
     }
 
+    user.loggedIn = true;
+    await user.save();
+
     const token = jwt.sign(
       { userId: user._id },
       process.env.SECRET_KEY,
@@ -125,7 +124,7 @@ export const login = async (req, res) => {
     );
 
     const safeUser = await User.findById(user._id).select(
-      "_id username profilePhoto about connectedUsers"
+      "_id username profilePhoto about connectedUsers loggedIn"
     );
 
     let allMessages = [];
@@ -146,7 +145,6 @@ export const login = async (req, res) => {
         participants = conversation.participants || [];
       }
     }
-
 
     let allGroups = [];
     let allGroupMessages = [];
@@ -196,14 +194,18 @@ export const login = async (req, res) => {
   }
 };
 
-
 export const logout = async (req, res) => {
   try {
     const cookie = req.cookies.token;
     if (!cookie) return res.status(400).json({
       message: "No cookie available",
       success: false,
-    })
+    });
+
+    if (req.id) {
+      await User.findByIdAndUpdate(req.id, { loggedIn: false });
+    }
+
     return res.status(200).clearCookie("token").json({
       message: "logout Successful",
       success: true,
@@ -237,6 +239,13 @@ export const remember = async (req, res) => {
       });
     }
 
+    if (!user.loggedIn) {
+      return res.status(401).clearCookie("token").json({
+        message: "Session expired or logged out from another device.",
+        success: false,
+      });
+    }
+
     let allMessages = [];
     let participants = [];
 
@@ -253,7 +262,6 @@ export const remember = async (req, res) => {
         participants = conversation.participants || [];
       }
     }
-
 
     let allGroups = [];
     let allGroupMessages = [];
@@ -278,7 +286,6 @@ export const remember = async (req, res) => {
       }))
     }
 
-
     return res.status(200).json({
       success: true,
       user,
@@ -296,5 +303,3 @@ export const remember = async (req, res) => {
     });
   }
 };
-
-

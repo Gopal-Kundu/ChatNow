@@ -1,15 +1,16 @@
-import React, { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
+import React, { useState } from "react";
+import { useDispatch, useSelector } from "react-redux"; // Added useSelector
 import axios from "axios";
 import { baseurl } from "../../address/address";
-import { setMsg, setNewChat } from "../../redux/chatSlice";
+import { setMsg, replaceTempMsg } from "../../redux/chatSlice"; // Added replaceTempMsg
 import { Send } from "lucide-react";
-import { socket } from "../App";
 
 function InputBox({ theirId }) {
   const [msg, currMsg] = useState("");
-
   const dispatch = useDispatch();
+  
+  // Grab the current user so we can attach their ID to the optimistic message
+  const user = useSelector((state) => state.auth?.user);
 
   function handleKeyDown(e) {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -23,6 +24,20 @@ function InputBox({ theirId }) {
 
     const messageToSend = msg;
     currMsg("");
+    const tempId = `temp${Date.now()}`;
+
+    const optimisticMsg = {
+      _id: tempId,
+      senderId: user._id,
+      receiverId: theirId,
+      message: messageToSend,
+      createdAt: new Date().toISOString(),
+      status: "sending",
+    };
+
+    // 4. Dispatch to UI instantly!
+    dispatch(setMsg(optimisticMsg));
+
     try {
       const res = await axios.post(
         `${baseurl}/sendmsg/${theirId}`,
@@ -34,7 +49,10 @@ function InputBox({ theirId }) {
       );
 
       if (res.data.success) {
-        dispatch(setMsg(res.data.newMessage));
+        dispatch(replaceTempMsg({ 
+          tempId: tempId, 
+          realMsg: res.data.newMessage 
+        }));
       }
     } catch (err) {
       console.error(err);

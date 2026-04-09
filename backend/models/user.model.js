@@ -10,6 +10,7 @@ const userModel = new mongoose.Schema({
   joinedGroups: [{
     groups: {type: mongoose.Schema.Types.ObjectId, ref: "Group"},
     newMsgCount: {type: Number, default: 0}
-  }]
+  }],
+  loggedIn: { type: Boolean, default: false }
 })
 export const User = mongoose.model("User", userModel);
