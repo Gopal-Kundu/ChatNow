@@ -30,7 +30,6 @@ function LeftSideBar() {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [showCreateGroup, setShowCreateGroup] = useState(false);
 
-
   const logo = user?.profilePhoto || defaultImg;
 
   async function handleLogout() {
@@ -87,16 +86,16 @@ function LeftSideBar() {
     setShowCreateGroup(true);
   }
 
-
-
   return (
-    
-<div className="flex flex-col h-[100dvh] border-r border-white/20 bg-transparent">
-
+    <div className="flex flex-col h-screen border-r border-white/20 bg-transparent">
       <div className="flex items-center gap-3 p-4 border-b border-white/20">
         <Link to={`profile/${user._id}`}>
           <div className="h-12 w-12 rounded-full overflow-hidden border-2 border-white cursor-pointer hover:scale-105 transition">
-            <img src={logo} alt="Profile" className="w-full h-full object-cover" />
+            <img
+              src={logo}
+              alt="Profile"
+              className="w-full h-full object-cover"
+            />
           </div>
         </Link>
 
@@ -146,7 +145,7 @@ function LeftSideBar() {
             id={perGroup?._id}
             groupName={perGroup?.groupName}
             logo={perGroup?.logo}
-            newMsgCount = {perGroup?.count}
+            newMsgCount={perGroup?.count}
           />
         ))}
       </div>
@@ -158,10 +157,7 @@ function LeftSideBar() {
       {showCreateGroup && (
         <CreateGroup onClose={() => setShowCreateGroup(false)} />
       )}
-
     </div>
-
-       
   );
 }
 
