@@ -27,6 +27,9 @@ import {
 import { RightSideBar } from "./components/RightSideBar";
 import LoadingPage from "./pages/LoadingPage";
 import { GroupChatPage } from "./pages/GroupChatPage";
+import WelcomePage from "./pages/WelcomePage";
+import Signup from "./pages/Signup";
+import ErrorPage from "./pages/ErrorPage";
 
 export let socket;
 
@@ -135,12 +138,14 @@ const App = () => {
   return (
     <div className="bg-black">
       <Routes>
-        <Route path="/" element={<HomePage />} />
+        <Route path="/" element={<WelcomePage />} />
+        <Route path="/signup" element={<Signup/>}/>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/chat/:id" element={<RightSideBar />} />
         <Route path="/group-chat/:id" element={<GroupChatPage />} />
         <Route path="/profile" element={<UpdateProfilePage />} />
         <Route path="/profile/:id" element={<UpdateProfilePage />} />
+        <Route path="*" element={<ErrorPage/>}/>
       </Routes>
     </div>
   );

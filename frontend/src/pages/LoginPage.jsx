@@ -58,7 +58,7 @@ function LoginPage() {
     <div className='h-screen select-none bg-[url("https://png.pngtree.com/background/20250104/original/pngtree-free-hd-wallpaper-4k-new-background-picture-image_15546678.jpg")] bg-cover bg-center'>
 
       <div className="inter py-4 flex justify-center items-center gap-4">
-        <Link to="/">
+        <Link to="/signup">
           <div className="bg-white/50 p-2 px-5 cursor-pointer inline-block  rounded-3xl hover:bg-white/90 transition-colors duration-400">
             Sign Up
           </div>
@@ -72,7 +72,7 @@ function LoginPage() {
         <div className="mt-2 flex text-white justify-center items-center gap-1">
           <div className="montserrat">Have no account?</div>
           <span className="underline cursor-pointer hover:text-blue-950">
-            <Link to="/">Sign Up</Link>
+            <Link to="/signup">Sign Up</Link>
           </span>
         </div>
 
@@ -97,7 +97,7 @@ function LoginPage() {
               required
             />
             <input
-              type="text"
+              type="password"
               name="password"
               value={formData.password}
               onChange={handleChange}

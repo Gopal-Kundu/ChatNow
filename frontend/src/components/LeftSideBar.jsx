@@ -44,7 +44,7 @@ function LeftSideBar() {
         dispatch(setAllMsgs([]));
         dispatch(setMsg(null));
         dispatch(setUser(null));
-        navigate("/login");
+        navigate("/");
       }
     } catch (err) {
       toast.error("Logout failed");
