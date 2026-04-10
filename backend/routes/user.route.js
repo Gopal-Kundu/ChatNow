@@ -23,7 +23,7 @@ const router = express.Router();
 router.post("/register", register);
 router.post("/update", isAuthenticated, update);
 router.post("/login", login);
-router.get("/logout", logout);
+router.get("/logout", isAuthenticated, logout);
 
 router.get("/getAllChats", isAuthenticated, getAllChats);
 router.post("/sendmsg/:id", isAuthenticated, sendMessage);
