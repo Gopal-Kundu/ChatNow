@@ -1,4 +1,4 @@
-# ChatNow Web App 🚀
+# Adda Chat Web App
 
 Welcome to **ChatNow**, a full-stack real-time chat application designed to provide seamless communication with an intuitive user interface. Whether you want to chat one-on-one or hang out in group chats, ChatNow has you covered!
 
@@ -61,7 +61,7 @@ Welcome to **ChatNow**, a full-stack real-time chat application designed to prov
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 To get a local copy up and running, follow these simple steps:
 
